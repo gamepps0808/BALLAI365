@@ -1,0 +1,281 @@
+import Link from "next/link";
+import { Star, Trophy, CheckCircle2, UserRound } from "lucide-react";
+import { Fixture } from "@/lib/types";
+import { TeamLogo } from "../ui/TeamLogo";
+import { PlayerPhoto } from "../ui/PlayerPhoto";
+import { FormBadges } from "../ui/FormBadges";
+import { ScoreRing } from "../ui/ScoreRing";
+import { ProbBar } from "../ui/ProbBar";
+import { Stars } from "../ui/Stars";
+import { Badge } from "../ui/Badge";
+import {
+  confidenceLabel,
+  confidenceTone,
+  riskLabel,
+  riskTone,
+  valueLabel,
+  valueTone,
+} from "@/lib/engine/labels";
+
+export function MatchOfTheDay({ fixture }: { fixture: Fixture }) {
+  const { homeTeam: home, awayTeam: away, league } = fixture;
+  const p = fixture.prediction;
+  const keyPlayers = [fixture.homeKeyPlayer, fixture.awayKeyPlayer].filter(
+    (kp) => kp !== undefined
+  );
+
+  return (
+    <section className="glass glow-green p-4 lg:p-5">
+      {/* Header */}
+      <div className="flex items-center gap-2">
+        <Star size={16} className="fill-[var(--neon-green)] text-[var(--neon-green)]" />
+        <h2 className="text-sm font-extrabold tracking-widest text-[var(--neon-green)]">
+          {fixture.isMatchOfTheDay ? "AI MATCH OF THE DAY" : "คู่ที่เลือกดู"}
+        </h2>
+        {!fixture.isMatchOfTheDay && (
+          <span className="rounded bg-[var(--neon-blue-soft)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--neon-blue)]">
+            SELECTED
+          </span>
+        )}
+      </div>
+
+      {/* Teams */}
+      <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+        <div className="flex items-center gap-3">
+          <TeamLogo teamId={home.id} shortName={home.shortName} logo={home.logo} size={56} />
+          <div className="min-w-0">
+            <p className="truncate text-base font-extrabold lg:text-lg">{home.name.toUpperCase()}</p>
+            <FormBadges form={home.form} />
+            <p className="mt-1 text-[11px] text-[var(--text-secondary)]">
+              {home.fifaRank
+                ? `อันดับโลก ${home.fifaRank}`
+                : home.rank > 0
+                  ? `อันดับ ${home.rank} | ${home.points} แต้ม`
+                  : "ไม่มีข้อมูลอันดับ"}
+            </p>
+          </div>
+        </div>
+
+        <div className="text-center">
+          <p className="text-[11px] text-[var(--text-secondary)]">{league.nameTh}</p>
+          <p className="text-[13px] font-semibold text-[var(--neon-blue)]">
+            {fixture.kickoffLabel}{" "}
+            <span className="text-[var(--text-muted)]">{kickoffDateLabel(fixture.kickoff)}</span>
+          </p>
+          {fixture.status === "LIVE" ? (
+            <>
+              <p className="tabular text-2xl font-black tracking-widest text-[var(--danger)] lg:text-3xl">
+                {fixture.homeGoals ?? 0} - {fixture.awayGoals ?? 0}
+              </p>
+              <p className="animate-pulse text-[10px] font-bold tracking-widest text-[var(--danger)]">
+                ● LIVE{fixture.elapsed != null ? ` ${fixture.elapsed}'` : ""}
+              </p>
+            </>
+          ) : fixture.status === "FINISHED" ? (
+            <>
+              <p className="tabular text-2xl font-black tracking-widest lg:text-3xl">
+                {fixture.homeGoals ?? "-"} - {fixture.awayGoals ?? "-"}
+              </p>
+              <p className="text-[10px] font-bold tracking-widest text-[var(--text-muted)]">จบแล้ว</p>
+            </>
+          ) : (
+            <p className="text-2xl font-black tracking-widest lg:text-3xl">VS</p>
+          )}
+        </div>
+
+        <div className="flex items-center justify-end gap-3 text-right">
+          <div className="min-w-0">
+            <p className="truncate text-base font-extrabold lg:text-lg">{away.name.toUpperCase()}</p>
+            <div className="flex justify-end">
+              <FormBadges form={away.form} />
+            </div>
+            <p className="mt-1 text-[11px] text-[var(--text-secondary)]">
+              {away.fifaRank
+                ? `อันดับโลก ${away.fifaRank}`
+                : away.rank > 0
+                  ? `อันดับ ${away.rank} | ${away.points} แต้ม`
+                  : "ไม่มีข้อมูลอันดับ"}
+            </p>
+          </div>
+          <TeamLogo teamId={away.id} shortName={away.shortName} logo={away.logo} size={56} />
+        </div>
+      </div>
+
+      {/* AI Pick row */}
+      <div className="mt-5 grid gap-3 lg:grid-cols-[1.2fr_1fr_auto_auto]">
+        {/* Pick */}
+        <div className="rounded-xl border border-[var(--border-glow-green)] bg-[var(--neon-green-soft)] p-4">
+          <p className="flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-[var(--gold)]">
+            <Trophy size={13} /> AI PICK
+          </p>
+          <p className="text-glow-green mt-1 text-xl font-black text-[var(--neon-green)] lg:text-2xl">
+            {p.pickLabel}
+          </p>
+          <p className="mt-1 text-[12px] text-[var(--text-secondary)]">
+            AI เลือก: {p.pickTeamName} ชนะ
+          </p>
+        </div>
+
+        {/* Win probability */}
+        <div className="glass p-4">
+          <p className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)]">
+            WIN PROBABILITY
+          </p>
+          {/* grid 3 คอลัมน์เท่ากัน — ตัวเลขตรงแนวเดียวกันเสมอ ชื่อทีมยาวถูกตัดด้วย … */}
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            {[
+              { v: p.winProbability.home, l: home.shortName, c: "var(--neon-green)" },
+              { v: p.winProbability.draw, l: "เสมอ", c: "var(--neon-blue)" },
+              { v: p.winProbability.away, l: away.shortName, c: "var(--text-secondary)" },
+            ].map(({ v, l, c }) => (
+              <div key={l} className="min-w-0 text-center">
+                <p className="tabular text-xl font-extrabold leading-none" style={{ color: c }}>
+                  {v}%
+                </p>
+                <p className="mt-1 truncate text-[10px] text-[var(--text-muted)]" title={l}>
+                  {l}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-2">
+            <ProbBar {...p.winProbability} />
+          </div>
+        </div>
+
+        {/* AI Score */}
+        <div className="glass flex flex-col items-center justify-center p-4">
+          <p className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)]">
+            AI SCORE
+          </p>
+          <ScoreRing score={p.aiScore} size={88} />
+        </div>
+
+        {/* Confidence / Risk / Value */}
+        <div className="glass flex flex-col justify-center gap-2.5 p-4 text-[12px]">
+          <div className="flex items-center justify-between gap-6">
+            <span className="text-[var(--text-muted)]">CONFIDENCE</span>
+            <Badge tone={confidenceTone[p.confidence]}>{confidenceLabel[p.confidence]}</Badge>
+          </div>
+          <div className="flex items-center justify-between gap-6">
+            <span className="text-[var(--text-muted)]">RISK</span>
+            <Badge tone={riskTone[p.risk]}>{riskLabel[p.risk]}</Badge>
+          </div>
+          <div className="flex items-center justify-between gap-6">
+            <span className="text-[var(--text-muted)]">VALUE</span>
+            <Badge tone={valueTone[p.value]}>{valueLabel[p.value]}</Badge>
+          </div>
+        </div>
+      </div>
+
+      {/* Stat strip */}
+      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+        {[
+          { label: "EXPECTED SCORE", value: `${p.expectedScore.home} - ${p.expectedScore.away}`, sub: "สกอร์ที่คาด" },
+          p.handicapPickTeam !== null
+            ? { label: "HANDICAP PICK", value: p.handicapPickTeam, sub: `แต้มต่อ ${p.handicapLine}`, accent: "var(--soft-purple)" }
+            : { label: "HANDICAP PICK", value: "ไม่มีข้อมูลแฮนดิแคป", sub: "Missing Data", accent: "var(--text-muted)" },
+          p.overUnderPick !== null
+            ? { label: "OVER / UNDER PICK", value: `${p.overUnderPick === "OVER" ? "Over" : "Under"} ${p.overUnderLine}`, sub: p.overUnderNote ?? `สกอร์รวม ${p.overUnderLine}`, accent: "var(--soft-purple)" }
+            : { label: "OVER / UNDER PICK", value: "ไม่มีข้อมูลสูงต่ำ", sub: "Missing Data", accent: "var(--text-muted)" },
+          p.cornerPick !== null
+            ? { label: "CORNER PICK", value: `${p.cornerPick === "OVER" ? "Over" : "Under"} ${p.cornerLine}`, sub: `เตะมุมรวม ${p.cornerLine}`, accent: "var(--soft-purple)" }
+            : { label: "CORNER PICK", value: "ไม่มีข้อมูลเตะมุม", sub: "Missing Data", accent: "var(--text-muted)" },
+          { label: "VALUE RATING", value: "", sub: "Value Rating", stars: p.valueStars },
+          { label: "DATA QUALITY", value: `${p.dataQuality}/100`, sub: p.dataQuality >= 70 ? "ข้อมูลค่อนข้างสมบูรณ์" : "ข้อมูลยังไม่ครบ", accent: p.dataQuality >= 70 ? "var(--neon-green)" : "var(--warning)" },
+        ].map((s) => (
+          <div key={s.label} className="glass p-3">
+            <p className="text-[10px] font-semibold tracking-wider text-[var(--text-muted)]">{s.label}</p>
+            {s.stars ? (
+              <div className="mt-1.5">
+                <Stars count={s.stars} />
+              </div>
+            ) : (
+              <p className="tabular mt-1 text-[14px] font-bold leading-tight break-words" style={{ color: s.accent }}>
+                {s.value}
+              </p>
+            )}
+            <p className="text-[10px] leading-tight text-[var(--text-secondary)]">{s.sub}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* AI Reason + Key Players */}
+      <div className="mt-3 grid gap-3 lg:grid-cols-[1.1fr_1fr]">
+        <div className="glass p-4">
+          <p className="text-[11px] font-bold tracking-wider text-[var(--neon-green)]">
+            AI REASON <span className="font-normal text-[var(--text-muted)]">(เหตุผลที่เลือก)</span>
+          </p>
+          <ul className="mt-2 space-y-1.5">
+            {p.reasons.map((r) => (
+              <li key={r} className="flex items-start gap-2 text-[12px] text-[var(--text-secondary)]">
+                <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-[var(--neon-green)]" />
+                {r}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="glass p-4">
+          <p className="flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-[var(--text-secondary)]">
+            <UserRound size={13} /> KEY PLAYER
+          </p>
+          {keyPlayers.length === 0 && (
+            <p className="mt-3 text-[11px] text-[var(--text-muted)]">
+              ยังไม่มีข้อมูลนักเตะสำหรับคู่นี้ (Missing Data)
+            </p>
+          )}
+          <div className="mt-2 grid grid-cols-2 gap-3">
+            {keyPlayers.map((kp) => (
+              <div key={kp.id} className="flex items-start gap-2.5">
+                <PlayerPhoto photo={kp.photo} name={kp.name} size={44} />
+                <div className="min-w-0 text-[11px]">
+                  <p className="flex items-center gap-1 truncate text-[12px] font-bold">
+                    {kp.name}
+                    <Star size={11} className="shrink-0 fill-[var(--gold)] text-[var(--gold)]" />
+                  </p>
+                  <p className="text-[var(--text-muted)]">{kp.positionTh}</p>
+                  {kp.rating > 0 ? (
+                    <>
+                      <p>
+                        Rating <span className="font-bold text-[var(--neon-blue)]">{kp.rating}</span>
+                      </p>
+                      <p className="text-[var(--text-secondary)]">
+                        {kp.goals} ประตู {kp.assists} แอสซิสต์
+                      </p>
+                      {kp.fitness > 0 && (
+                        <p>
+                          ความฟิต <span className="font-bold text-[var(--neon-green)]">{kp.fitness}%</span>
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-[var(--soft-purple)]">เลือกโดย Claude AI</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-3 flex items-center justify-between gap-3">
+        <p className="text-[10px] text-[var(--text-muted)]">{p.warning}</p>
+        <Link
+          href={`/match/${fixture.id}`}
+          className="shrink-0 rounded-lg bg-[var(--neon-green)] px-4 py-2 text-[12px] font-bold text-black transition-opacity hover:opacity-90"
+        >
+          ดูการวิเคราะห์เต็ม
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+function kickoffDateLabel(iso: string): string {
+  return new Date(iso).toLocaleDateString("th-TH", {
+    day: "numeric",
+    month: "short",
+    timeZone: "Asia/Bangkok",
+  });
+}

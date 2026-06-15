@@ -1,0 +1,335 @@
+// AI FOOTBALL ANALYTICS — Database Schema (PostgreSQL / Supabase)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SubscriptionTier {
+  FREE
+  PRO
+  VIP
+  ADMIN
+}
+
+enum FixtureStatus {
+  SCHEDULED
+  LIVE
+  FINISHED
+  POSTPONED
+}
+
+enum PickSide {
+  HOME
+  DRAW
+  AWAY
+}
+
+enum ConfidenceLevel {
+  VERY_HIGH
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  VERY_HIGH
+}
+
+enum ValueRating {
+  NO_VALUE
+  SMALL_VALUE
+  GOOD_VALUE
+  STRONG_VALUE
+  ELITE_VALUE
+}
+
+enum PredictionStatus {
+  ACTIVE
+  WATCHLIST
+  REJECTED
+  AVOID
+}
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  name         String?
+  createdAt    DateTime      @default(now())
+  subscription Subscription?
+  settings     UserSettings?
+  alerts       Alert[]
+}
+
+model Subscription {
+  id        String           @id @default(cuid())
+  userId    String           @unique
+  user      User             @relation(fields: [userId], references: [id])
+  tier      SubscriptionTier @default(FREE)
+  startsAt  DateTime         @default(now())
+  expiresAt DateTime?
+  active    Boolean          @default(true)
+}
+
+model UserSettings {
+  id            String  @id @default(cuid())
+  userId        String  @unique
+  user          User    @relation(fields: [userId], references: [id])
+  language      String  @default("th")
+  timezone      String  @default("Asia/Bangkok")
+  notifyAiScore Boolean @default(true)
+  notifyValue   Boolean @default(true)
+  notifyOdds    Boolean @default(true)
+  notifyRisk    Boolean @default(true)
+}
+
+model League {
+  id       String    @id
+  name     String
+  nameTh   String
+  country  String
+  logo     String?
+  enabled  Boolean   @default(false)
+  isCup    Boolean   @default(false)
+  teams    Team[]
+  fixtures Fixture[]
+}
+
+model Team {
+  id           String    @id
+  leagueId     String
+  league       League    @relation(fields: [leagueId], references: [id])
+  name         String
+  shortName    String
+  logo         String?
+  rank         Int       @default(0)
+  points       Int       @default(0)
+  form         String    @default("") // e.g. "WWWDW"
+  powerRating  Json // TeamPowerRating
+  statsAvg     Json // TeamStatsAvg
+  players      Player[]
+  homeFixtures Fixture[] @relation("HomeTeam")
+  awayFixtures Fixture[] @relation("AwayTeam")
+  injuries     Injury[]
+  lineups      Lineup[]
+}
+
+model Player {
+  id        String   @id
+  teamId    String
+  team      Team     @relation(fields: [teamId], references: [id])
+  name      String
+  position  String
+  rating    Float    @default(0)
+  goals     Int      @default(0)
+  assists   Int      @default(0)
+  fitness   Int      @default(100)
+  photo     String?
+  keyPlayer Boolean  @default(false)
+  status    String   @default("fit") // fit | injured | suspended | doubtful
+  injuries  Injury[]
+}
+
+model Fixture {
+  id           String             @id
+  leagueId     String
+  league       League             @relation(fields: [leagueId], references: [id])
+  homeTeamId   String
+  homeTeam     Team               @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeamId   String
+  awayTeam     Team               @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  kickoff      DateTime
+  status       FixtureStatus      @default(SCHEDULED)
+  homeScore    Int?
+  awayScore    Int?
+  homeCorners  Int?
+  awayCorners  Int?
+  statistics   FixtureStatistic[]
+  odds         Odds[]
+  oddsHistory  OddsHistory[]
+  lineups      Lineup[]
+  weather      Weather?
+  prediction   Prediction?
+  alerts       Alert[]
+  backtest     BacktestResult[]
+
+  @@index([kickoff])
+  @@index([leagueId, kickoff])
+}
+
+model FixtureStatistic {
+  id        String  @id @default(cuid())
+  fixtureId String
+  fixture   Fixture @relation(fields: [fixtureId], references: [id])
+  teamSide  String // HOME | AWAY
+  name      String // possession, shots, corners, ...
+  value     Float
+
+  @@unique([fixtureId, teamSide, name])
+}
+
+model Odds {
+  id            String   @id @default(cuid())
+  fixtureId     String
+  fixture       Fixture  @relation(fields: [fixtureId], references: [id])
+  bookmaker     String
+  homeWin       Float
+  draw          Float
+  awayWin       Float
+  handicapLine  Float?
+  handicapHome  Float?
+  handicapAway  Float?
+  overUnderLine Float?
+  overOdds      Float?
+  underOdds     Float?
+  fetchedAt     DateTime @default(now())
+
+  @@index([fixtureId, fetchedAt])
+}
+
+model OddsHistory {
+  id            String   @id @default(cuid())
+  fixtureId     String
+  fixture       Fixture  @relation(fields: [fixtureId], references: [id])
+  snapshot      Json // full OddsPoint
+  capturedAt    DateTime @default(now())
+  steamMove     Boolean  @default(false)
+  sharpMoney    Boolean  @default(false)
+
+  @@index([fixtureId, capturedAt])
+}
+
+model Lineup {
+  id        String  @id @default(cuid())
+  fixtureId String
+  fixture   Fixture @relation(fields: [fixtureId], references: [id])
+  teamId    String
+  team      Team    @relation(fields: [teamId], references: [id])
+  formation String?
+  confirmed Boolean @default(false)
+  players   Json // expected/confirmed XI + bench
+
+  @@unique([fixtureId, teamId])
+}
+
+model Injury {
+  id         String    @id @default(cuid())
+  teamId     String
+  team       Team      @relation(fields: [teamId], references: [id])
+  playerId   String?
+  player     Player?   @relation(fields: [playerId], references: [id])
+  type       String // injury | suspension
+  detail     String?
+  expectedReturn DateTime?
+  reportedAt DateTime  @default(now())
+}
+
+model Weather {
+  id              String  @id @default(cuid())
+  fixtureId       String  @unique
+  fixture         Fixture @relation(fields: [fixtureId], references: [id])
+  temperatureC    Float
+  rainProbability Int
+  windKmh         Float
+  humidity        Int
+  impactScore     Int
+}
+
+model Prediction {
+  id               String           @id @default(cuid())
+  fixtureId        String           @unique
+  fixture          Fixture          @relation(fields: [fixtureId], references: [id])
+  pick             PickSide
+  pickTeamName     String // always a team name, never "Home Win"
+  homeProb         Float
+  drawProb         Float
+  awayProb         Float
+  expectedHome     Int
+  expectedAway     Int
+  handicapLine     Float
+  handicapPick     String
+  overUnderLine    Float
+  overUnderPick    String
+  cornerLine       Float
+  cornerPick       String
+  aiScore          Int
+  confidence       ConfidenceLevel
+  risk             RiskLevel
+  riskScore        Int
+  value            ValueRating
+  edgePct          Float
+  dataQuality      Int
+  status           PredictionStatus
+  modelOutputs     Json // per-model probabilities + weights
+  reasons          PredictionReason[]
+  createdAt        DateTime         @default(now())
+}
+
+model PredictionReason {
+  id           String     @id @default(cuid())
+  predictionId String
+  prediction   Prediction @relation(fields: [predictionId], references: [id])
+  order        Int
+  textTh       String
+  textEn       String?
+}
+
+model BacktestResult {
+  id          String   @id @default(cuid())
+  fixtureId   String
+  fixture     Fixture  @relation(fields: [fixtureId], references: [id])
+  market      String // 1X2 | HANDICAP | OVER_UNDER | CORNERS | CORRECT_SCORE
+  predicted   String
+  actual      String
+  correct     Boolean
+  aiScore     Int
+  confidence  ConfidenceLevel
+  settledAt   DateTime @default(now())
+
+  @@index([market, settledAt])
+}
+
+model Alert {
+  id        String   @id @default(cuid())
+  fixtureId String
+  fixture   Fixture  @relation(fields: [fixtureId], references: [id])
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  type      String // AI_SCORE | VALUE | ODDS_MOVE | LINEUP | WEATHER | RISK | AVOID
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model ApiLog {
+  id         String   @id @default(cuid())
+  provider   String
+  endpoint   String
+  status     Int
+  durationMs Int
+  error      String?
+  createdAt  DateTime @default(now())
+
+  @@index([provider, createdAt])
+}
+
+model ModelWeightConfig {
+  id                   String   @id @default(cuid())
+  name                 String   @unique @default("default")
+  teamForm             Int      @default(20)
+  homeAwayStrength     Int      @default(15)
+  attackDefense        Int      @default(15)
+  injuries             Int      @default(15)
+  oddsMovement         Int      @default(10)
+  headToHead           Int      @default(10)
+  cornerTrend          Int      @default(10)
+  weatherTravelFatigue Int      @default(5)
+  updatedAt            DateTime @updatedAt
+}
