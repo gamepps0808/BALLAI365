@@ -114,6 +114,23 @@ export function MatchOfTheDay({ fixture }: { fixture: Fixture }) {
           <p className="mt-1 text-[12px] text-[var(--text-secondary)]">
             AI เลือก: {p.pickTeamName} ชนะ
           </p>
+          {(() => {
+            // ทายผลชนะ (1X2) กับคำแนะนำราคาต่อรอง อาจคนละทีม —
+            // ตัวเต็งชนะแต่ "ชนะไม่ขาด" จึงไม่ผ่านราคาต่อรอง → แนะนำรับลูกทีมรอง
+            const pickTeam = p.pick === "HOME" ? home : p.pick === "AWAY" ? away : null;
+            const hcDiffers =
+              !!pickTeam &&
+              !!p.handicapPickTeam &&
+              !p.handicapPickTeam.includes(pickTeam.shortName) &&
+              !p.handicapPickTeam.includes(pickTeam.name);
+            if (!hcDiffers) return null;
+            return (
+              <p className="mt-2 rounded-lg bg-[var(--warning-soft)] px-2.5 py-1.5 text-[11px] leading-relaxed text-[var(--warning)]">
+                ⚠️ {pickTeam!.shortName} ชนะแต่ <b>ไม่ผ่านราคาต่อรอง</b> (ชนะไม่ขาด) —
+                ถ้าจะเล่นแฮนดิแคป AI แนะนำให้มอง <b>{p.handicapPickTeam}</b>
+              </p>
+            );
+          })()}
         </div>
 
         {/* Win probability */}
