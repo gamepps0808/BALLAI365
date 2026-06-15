@@ -68,7 +68,11 @@ export async function GET(request: NextRequest) {
   for (const c of candidates) {
     try {
       if (!provider.getFixtureById) break;
-      const fixture = await provider.getFixtureById(c.id);
+      const afId = c.id.replace(/^af-/, "");
+      // ล้าง cache ไลน์อัพของคู่นี้ก่อน → เช็คว่ารายชื่อ "เพิ่งออก" จากข้อมูลสดจริง
+      // (ไลน์อัพ cache 5 นาที — ถ้าไม่ล้างอาจพลาดจังหวะที่รายชื่อเพิ่งประกาศ)
+      invalidate(`af:/fixtures/lineups?fixture=${afId}`);
+      let fixture = await provider.getFixtureById(c.id);
       if (!fixture || fixture.status !== "SCHEDULED") continue;
 
       // รอไลน์อัพก่อนถ้ายังมีเวลา — ตัวจริงคือข้อมูลสำคัญสุดของรอบสุดท้าย
@@ -84,7 +88,15 @@ export async function GET(request: NextRequest) {
         continue;
       }
 
-      // วิเคราะห์ใหม่ด้วยข้อมูลปัจจุบัน (force = ข้ามผลเดิม) แล้วล็อกรอบสุดท้าย
+      // รายชื่อออกแล้ว → ดึง "ราคา + สถิติ + predictions" สดใหม่ก่อนวิเคราะห์รอบสุดท้าย
+      // (ราคามักขยับตอนรายชื่อออก — Claude ต้องเห็นราคาล่าสุด ไม่ใช่ cache เก่า)
+      invalidate(`af:/odds?fixture=${afId}`);
+      invalidate(`af:/fixtures/statistics?fixture=${afId}`);
+      invalidate(`af:/predictions?fixture=${afId}`);
+      fixture = await provider.getFixtureById(c.id);
+      if (!fixture) continue;
+
+      // วิเคราะห์ใหม่ด้วยข้อมูลสดทั้งหมด (force = ข้ามผลเดิม) แล้วล็อกรอบสุดท้าย
       const analysis = await analyzeFixtureWithClaude(fixture, { force: true });
       if (!analysis) continue;
       applyClaudeAnalysis(fixture, analysis);
