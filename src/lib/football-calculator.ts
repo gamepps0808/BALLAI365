@@ -116,6 +116,33 @@ export function pickBookmaker(bookmakers: AfOddsBookmaker[]): AfOddsBookmaker | 
   return bookmakers[0] ?? null;
 }
 
+/** ราคาน้ำขั้นต่ำที่ยอมรับ — เส้นที่แนะนำต้องมีราคาทั้งสองฝั่ง ≥ ค่านี้ (ไม่เล่นราคาจ่ายน้อย) */
+export const MIN_ACCEPTABLE_ODD = 1.8;
+
+/**
+ * เลือก "เส้นหลัก" ของตลาด: ราคาทั้งสองฝั่ง ≥ 1.8 ก่อน (ฝั่งไหน AI เลือกก็จ่ายคุ้ม)
+ * แล้วเลือกเส้นที่ราคาสมดุลสุดในกลุ่มนั้น · ถ้าไม่มีเส้นใดผ่านเกณฑ์ → ใช้สมดุลสุดจากทั้งหมด
+ * (กันตลาดหาย) · tiebreakNear: เสมอกันให้เลือกเส้นใกล้ค่านี้ เช่น 2.5 สำหรับสูง/ต่ำ
+ */
+export function pickFairLine(
+  entries: { line: number; a: number; b: number }[],
+  tiebreakNear?: number
+): { line: number; a: number; b: number } | null {
+  if (entries.length === 0) return null;
+  const fair = entries.filter(
+    (e) => e.a >= MIN_ACCEPTABLE_ODD && e.b >= MIN_ACCEPTABLE_ODD
+  );
+  const pool = fair.length > 0 ? fair : entries;
+  pool.sort(
+    (x, y) =>
+      Math.abs(x.a - x.b) - Math.abs(y.a - y.b) ||
+      (tiebreakNear != null
+        ? Math.abs(x.line - tiebreakNear) - Math.abs(y.line - tiebreakNear)
+        : 0)
+  );
+  return pool[0];
+}
+
 export interface MatchWinnerOdds {
   home: number;
   draw: number;
@@ -164,16 +191,13 @@ export function extractOverUnder(bookmakers: AfOddsBookmaker[]): OverUnderMarket
       lines.set(line, entry);
     }
   }
-  const complete = [...lines.entries()].filter(([, e]) => e.over && e.under);
-  if (complete.length === 0) return null;
-  // เส้นหลักของตลาด = คู่ราคาสมดุลที่สุด (เสมอภาค) — เสมอกันให้เลือกใกล้ 2.5
-  complete.sort(
-    (a, b) =>
-      Math.abs(a[1].over! - a[1].under!) - Math.abs(b[1].over! - b[1].under!) ||
-      Math.abs(a[0] - 2.5) - Math.abs(b[0] - 2.5)
-  );
-  const [line, e] = complete[0];
-  return { line, overOdd: e.over!, underOdd: e.under!, bookmaker: bk.name };
+  // เส้นที่ราคาทั้งสองฝั่ง ≥ 1.8 แล้วสมดุลสุด — เสมอกันเลือกใกล้ 2.5
+  const entries = [...lines.entries()]
+    .filter(([, e]) => e.over != null && e.under != null)
+    .map(([line, e]) => ({ line, a: e.over!, b: e.under! }));
+  const best = pickFairLine(entries, 2.5);
+  if (!best) return null;
+  return { line: best.line, overOdd: best.a, underOdd: best.b, bookmaker: bk.name };
 }
 
 export interface HandicapMarket {
@@ -207,15 +231,12 @@ export function extractAsianHandicap(bookmakers: AfOddsBookmaker[]): HandicapMar
       else entry.away = Number(v.odd);
       lines.set(line, entry);
     }
-    // most balanced = |homeOdd - awayOdd| smallest
-    let best: HandicapMarket | null = null;
-    for (const [line, e] of lines) {
-      if (!e.home || !e.away) continue;
-      if (!best || Math.abs(e.home - e.away) < Math.abs(best.homeOdd - best.awayOdd)) {
-        best = { line, homeOdd: e.home, awayOdd: e.away, bookmaker: bk.name };
-      }
-    }
-    if (best) return best;
+    // เส้นที่ราคาทั้งสองฝั่ง ≥ 1.8 แล้วสมดุลสุด (ฝั่งไหน AI เลือกก็จ่ายคุ้ม)
+    const entries = [...lines.entries()]
+      .filter(([, e]) => e.home != null && e.away != null)
+      .map(([line, e]) => ({ line, a: e.home!, b: e.away! }));
+    const best = pickFairLine(entries);
+    if (best) return { line: best.line, homeOdd: best.a, awayOdd: best.b, bookmaker: bk.name };
   }
   return null;
 }
@@ -248,14 +269,12 @@ export function extractCornersOverUnder(bookmakers: AfOddsBookmaker[]): CornersM
       else entry.under = Number(v.odd);
       lines.set(line, entry);
     }
-    let best: CornersMarket | null = null;
-    for (const [line, e] of lines) {
-      if (!e.over || !e.under) continue;
-      if (!best || Math.abs(e.over - e.under) < Math.abs(best.overOdd - best.underOdd)) {
-        best = { line, overOdd: e.over, underOdd: e.under, bookmaker: bk.name };
-      }
-    }
-    if (best) return best;
+    // เส้นที่ราคาทั้งสองฝั่ง ≥ 1.8 แล้วสมดุลสุด — เสมอกันเลือกใกล้ 9.5 (เส้นเตะมุมมาตรฐาน)
+    const entries = [...lines.entries()]
+      .filter(([, e]) => e.over != null && e.under != null)
+      .map(([line, e]) => ({ line, a: e.over!, b: e.under! }));
+    const best = pickFairLine(entries, 9.5);
+    if (best) return { line: best.line, overOdd: best.a, underOdd: best.b, bookmaker: bk.name };
   }
   return null;
 }
