@@ -22,11 +22,18 @@ export interface AfFixtureRaw {
     date: string;
     status: { short: string; elapsed: number | null };
     referee?: string | null;
-    venue?: { name?: string | null; city?: string | null };
+    venue?: { id?: number | null; name?: string | null; city?: string | null };
   };
   league: { id: number; season: number; name: string; country: string; logo?: string; round?: string };
   teams: { home: AfTeamRef; away: AfTeamRef };
   goals?: { home: number | null; away: number | null };
+}
+
+export interface AfVenue {
+  id: number;
+  name?: string;
+  city?: string;
+  country?: string;
 }
 
 export interface AfStandingRow {

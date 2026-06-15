@@ -12,6 +12,7 @@ import {
   AfLineupResponse,
   AfEventRow,
   AfTopScorerRow,
+  AfVenue,
   AfInjuryRow,
   AfPlayerRow,
 } from "@/types/football";
@@ -106,6 +107,11 @@ export function getTeamNextFixtures(teamId: number, next = 5) {
     `/fixtures?team=${teamId}&next=${next}&timezone=${encodeURIComponent(TZ)}`,
     3600
   );
+}
+
+/** 1d. GET /venues?id= — ข้อมูลสนาม (เมือง+ประเทศ ใช้หาพิกัดอากาศ) cache 30 วัน */
+export function getVenueById(venueId: number) {
+  return call<AfVenue[]>(`/venues?id=${venueId}`, 30 * 24 * 3600);
 }
 
 /** 2. GET /teams/statistics?league=&season=&team= */

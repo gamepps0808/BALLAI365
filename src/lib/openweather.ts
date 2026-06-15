@@ -8,6 +8,38 @@ import { WeatherInfo } from "./types";
  */
 
 const BASE = "https://api.openweathermap.org/data/2.5";
+const GEO = "https://api.openweathermap.org/geo/1.0/direct";
+
+/**
+ * หาพิกัด (lat/lon) ของสนามจากชื่อเมือง + ประเทศ ผ่าน OpenWeather Geocoding
+ * — country กันเมืองชื่อซ้ำ (เช่น Springfield) · cache 30 วัน (สนามไม่ย้าย)
+ * คืน null ถ้าหาไม่เจอ → ผู้เรียกแสดง "ไม่มีข้อมูลอากาศ" (ไม่เดา)
+ */
+async function geocode(
+  city: string,
+  country: string | null | undefined,
+  key: string
+): Promise<{ lat: number; lon: number } | null> {
+  return cached(`owm:geo:${city}|${country ?? ""}`, 30 * 24 * 3600, async () => {
+    // ลอง "เมือง,ประเทศ" ก่อน (แม่นสุด กันชื่อซ้ำ) → ถ้าไม่เจอลอง "เมือง" เปล่า
+    for (const q of [country ? `${city},${country}` : "", city]) {
+      if (!q) continue;
+      try {
+        const r = await fetch(
+          `${GEO}?q=${encodeURIComponent(q)}&limit=1&appid=${key}`,
+          { signal: AbortSignal.timeout(10_000) }
+        );
+        const arr = (await r.json()) as { lat?: number; lon?: number }[];
+        if (arr?.[0]?.lat != null && arr[0].lon != null) {
+          return { lat: arr[0].lat, lon: arr[0].lon };
+        }
+      } catch {
+        /* ลอง query ถัดไป */
+      }
+    }
+    return null;
+  });
+}
 
 const CONDITION_TH: Record<string, string> = {
   Thunderstorm: "พายุฝนฟ้าคะนอง",
@@ -39,19 +71,28 @@ function impactNote(score: number, conditionTh: string): string {
   return `${conditionTh} — ผลกระทบต่ำ`;
 }
 
-export async function getMatchWeatherByCity(
-  city: string | null | undefined,
+/**
+ * อากาศ ณ พิกัดสนามแข่ง ช่วงเวลาใกล้คิกออฟ
+ * — หาพิกัด (lat/lon) จากเมือง+ประเทศของสนามก่อน แล้วถามอากาศที่พิกัดนั้น
+ *   แม่นกว่าถาม q=city เปล่า และกันเมืองชื่อซ้ำข้ามประเทศ (บอลโลกเตะหลายชาติ)
+ */
+export async function getMatchWeather(
+  venue: { city?: string | null; country?: string | null },
   kickoffIso: string
 ): Promise<WeatherInfo | null> {
   const key = process.env.OPENWEATHER_KEY;
+  const city = venue.city;
   if (!key || !city) return null;
 
-  // cache ราย เมือง+ชั่วโมงคิกออฟ (3 ชม.)
-  return cached(`owm:${city}:${kickoffIso.slice(0, 13)}`, 3 * 3600, async () => {
+  const coord = await geocode(city, venue.country, key);
+  if (!coord) return null;
+  const ll = `lat=${coord.lat}&lon=${coord.lon}`;
+
+  // cache รายพิกัด+ชั่วโมงคิกออฟ (3 ชม.)
+  return cached(`owm:${ll}:${kickoffIso.slice(0, 13)}`, 3 * 3600, async () => {
     try {
-      const q = encodeURIComponent(city);
       const res = await fetch(
-        `${BASE}/forecast?q=${q}&units=metric&appid=${key}`,
+        `${BASE}/forecast?${ll}&units=metric&appid=${key}`,
         { signal: AbortSignal.timeout(10_000) }
       );
       const json = (await res.json()) as OwmForecast;
@@ -71,9 +112,9 @@ export async function getMatchWeatherByCity(
         );
       }
 
-      // fallback: สภาพอากาศปัจจุบัน
+      // fallback: สภาพอากาศปัจจุบันที่พิกัดสนาม (คิกออฟไกลเกินช่วงพยากรณ์ 5 วัน)
       const cur = await fetch(
-        `${BASE}/weather?q=${q}&units=metric&appid=${key}`,
+        `${BASE}/weather?${ll}&units=metric&appid=${key}`,
         { signal: AbortSignal.timeout(10_000) }
       );
       const cj = (await cur.json()) as OwmCurrent;

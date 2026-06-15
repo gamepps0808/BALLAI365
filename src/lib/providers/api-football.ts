@@ -22,7 +22,7 @@ import { analyzeFixtureWithClaude, applyClaudeAnalysis, claudeEnabled } from "..
 import { recordPrediction, getLedgerEntry, LedgerEntry } from "../accuracy";
 import { getSettings } from "../settings";
 import { cacheGet, cachePut } from "../cache";
-import { getMatchWeatherByCity } from "../openweather";
+import { getMatchWeather } from "../openweather";
 import { loadSelection } from "../big-match-selector";
 import { loadSavedAnalysis } from "../claude-store";
 
@@ -68,6 +68,23 @@ function applyLockedMarkets(f: Fixture, locked: LedgerEntry): void {
 }
 
 // limit ทั้งสองอ่านจาก Admin settings (fallback = .env) — เปลี่ยนค่าแล้วมีผลรอบถัดไปทันที
+
+/**
+ * หาประเทศของสนามจาก venue.id (cache 30 วัน) แล้วดึงอากาศที่พิกัดสนามจริง
+ * — country ช่วยให้ geocoding แม่นและกันเมืองชื่อซ้ำ (บอลโลกเตะหลายประเทศ)
+ */
+async function resolveVenueWeather(
+  venue: { id?: number | null; city?: string | null } | undefined,
+  kickoffIso: string
+) {
+  if (!venue?.city) return null;
+  let country: string | null = null;
+  if (venue.id) {
+    const v = await api.getVenueById(venue.id).catch(() => []);
+    country = v[0]?.country ?? null;
+  }
+  return getMatchWeather({ city: venue.city, country }, kickoffIso);
+}
 
 export class ApiFootballProvider implements FootballDataProvider {
   readonly name = "api-football";
@@ -270,7 +287,7 @@ export class ApiFootballProvider implements FootballDataProvider {
       opts.enrich ? api.getTeamLastFixtures(homeId).catch(() => undefined) : Promise.resolve(undefined),
       opts.enrich ? api.getTeamLastFixtures(awayId).catch(() => undefined) : Promise.resolve(undefined),
       opts.enrich
-        ? getMatchWeatherByCity(raw.fixture.venue?.city, raw.fixture.date).catch(() => null)
+        ? resolveVenueWeather(raw.fixture.venue, raw.fixture.date).catch(() => null)
         : Promise.resolve(null),
       // เหตุการณ์สด — เฉพาะหน้ารายละเอียดและหลังเริ่มเตะ (ก่อนเตะ = ไม่มี ไม่ใช่ error)
       opts.detail && started
