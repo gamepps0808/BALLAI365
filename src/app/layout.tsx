@@ -5,6 +5,8 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { getAccuracySummary } from "@/lib/accuracy";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SITE_URL, SITE_NAME, SITE_TAGLINE } from "@/lib/seo";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { siteJsonLd } from "@/lib/jsonld";
 
 const notoThai = Noto_Sans_Thai({
   subsets: ["thai", "latin"],
@@ -56,6 +58,7 @@ export default function RootLayout({
   return (
     <html lang="th" className={`${notoThai.variable} h-full antialiased`}>
       <body className="min-h-full">
+        <JsonLd data={siteJsonLd()} />
         <Sidebar
           accuracy={{
             overall: acc.overall.pct,

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { matchJsonLd } from "@/lib/jsonld";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -82,6 +84,7 @@ export default async function MatchDetailPage({
 
   return (
     <main>
+      <JsonLd data={matchJsonLd(fixture)} />
       {fixture.status === "LIVE" && <AutoRefresh seconds={60} />}
       <Topbar title={`${home.shortName} vs ${away.shortName}`} />
       <div className="space-y-4 p-4 lg:p-6">
