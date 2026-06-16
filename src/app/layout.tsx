@@ -4,16 +4,48 @@ import "./globals.css";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { getAccuracySummary } from "@/lib/accuracy";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { SITE_URL, SITE_NAME, SITE_TAGLINE } from "@/lib/seo";
 
 const notoThai = Noto_Sans_Thai({
   subsets: ["thai", "latin"],
   variable: "--font-noto-thai",
 });
 
+const DESC =
+  "แพลตฟอร์มวิเคราะห์ฟุตบอลด้วย AI ระดับมืออาชีพ — AI Pick, Win Probability, แฮนดิแคป, สูง/ต่ำ, เตะมุม, Value Bet พร้อม Confidence และ Risk ทุกคู่";
+
 export const metadata: Metadata = {
-  title: "AI Football Analytics — วิเคราะห์ฟุตบอลด้วย AI",
-  description:
-    "แพลตฟอร์มวิเคราะห์ฟุตบอลด้วย AI ระดับมืออาชีพ — AI Pick, Win Probability, แฮนดิแคป, สูง/ต่ำ, เตะมุม, Value Bet พร้อม Confidence และ Risk ทุกคู่",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    // หน้าย่อยตั้ง title แค่ชื่อคู่ แล้วระบบต่อท้ายแบรนด์ให้อัตโนมัติ
+    template: `%s — ${SITE_NAME}`,
+  },
+  description: DESC,
+  keywords: [
+    "วิเคราะห์บอล",
+    "ทีเด็ดบอล",
+    "วิเคราะห์บอลวันนี้",
+    "AI วิเคราะห์บอล",
+    "ราคาบอล",
+    "แฮนดิแคป",
+    "สูงต่ำ",
+    "football analysis",
+  ],
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "th_TH",
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    description: DESC,
+    url: SITE_URL,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    description: DESC,
+  },
 };
 
 export default function RootLayout({

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -35,6 +36,37 @@ import {
 } from "@/lib/engine/labels";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * title/description เฉพาะรายคู่ เพื่อ SEO + การ์ดสวยตอนแชร์ social
+ * ใช้ fetchFixture(id) ตัวเดียวกับหน้าเพจ — cache ร่วมกัน ไม่ยิง API เพิ่ม
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  try {
+    const { fixture } = await fetchFixture(id);
+    if (!fixture?.homeTeam || !fixture.awayTeam)
+      return { title: "วิเคราะห์คู่การแข่งขัน" };
+    const h = fixture.homeTeam.name;
+    const a = fixture.awayTeam.name;
+    const p = fixture.prediction;
+    const league = fixture.league?.name ? ` · ${fixture.league.name}` : "";
+    const title = `${h} vs ${a} วิเคราะห์โดย AI`;
+    const desc = `วิเคราะห์ ${h} พบ ${a}${league} ด้วย AI — ทาย ${p.pickLabel} สกอร์ ${p.expectedScore.home}-${p.expectedScore.away}${p.handicapPickTeam ? ` · แฮนดิแคป ${p.handicapPickTeam}` : ""}`;
+    return {
+      title: `${h} vs ${a}`,
+      description: desc,
+      openGraph: { title, description: desc },
+      twitter: { title, description: desc },
+    };
+  } catch {
+    return { title: "วิเคราะห์คู่การแข่งขัน" };
+  }
+}
 
 export default async function MatchDetailPage({
   params,
