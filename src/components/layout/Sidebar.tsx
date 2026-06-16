@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   Home,
@@ -17,7 +18,6 @@ import {
   Bell,
   Settings,
   Crown,
-  Activity,
 } from "lucide-react";
 import { ScoreRing } from "../ui/ScoreRing";
 
@@ -49,18 +49,15 @@ export function Sidebar({ accuracy }: { accuracy: SidebarAccuracy }) {
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col gap-4 overflow-y-auto border-r border-[var(--border-subtle)] bg-[var(--bg-deep)]/80 p-4 backdrop-blur-xl lg:flex">
       {/* Logo */}
-      <Link href="/" className="flex items-center gap-2.5 px-1 py-2">
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--neon-blue-soft)] ring-1 ring-[var(--border-glow-blue)]">
-          <Activity size={18} className="text-[var(--neon-blue)]" />
-        </span>
-        <span className="leading-tight">
-          <span className="block text-sm font-extrabold tracking-wide">
-            AI <span className="text-[var(--neon-blue)]">FOOTBALL</span>
-          </span>
-          <span className="block text-[10px] tracking-[0.25em] text-[var(--text-muted)]">
-            ANALYTICS
-          </span>
-        </span>
+      <Link href="/" className="block px-1 py-1.5">
+        <Image
+          src="/logo.png"
+          alt="BALLAI365 — AI Football Analytics"
+          width={720}
+          height={210}
+          priority
+          className="h-auto w-full"
+        />
       </Link>
 
       {/* Menu */}
@@ -134,7 +131,7 @@ export function Sidebar({ accuracy }: { accuracy: SidebarAccuracy }) {
       {/* Premium card */}
       <div className="glass border-[rgba(245,197,66,0.3)] p-4">
         <p className="flex items-center gap-1.5 text-[12px] font-bold text-[var(--gold)]">
-          <Crown size={14} /> AI FOOTBALL PREMIUM
+          <Crown size={14} /> BALLAI365 PREMIUM
         </p>
         <p className="mt-1 text-[11px] text-[var(--text-secondary)]">
           อัปเกรดเพื่อเข้าถึงทุกฟีเจอร์

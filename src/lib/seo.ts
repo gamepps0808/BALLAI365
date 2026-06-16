@@ -7,5 +7,5 @@ export const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
 ).replace(/\/$/, "");
 
-export const SITE_NAME = "AI Football Analytics";
+export const SITE_NAME = "BALLAI365";
 export const SITE_TAGLINE = "วิเคราะห์ฟุตบอลด้วย AI";

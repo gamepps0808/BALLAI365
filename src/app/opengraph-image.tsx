@@ -5,7 +5,7 @@ import { ImageResponse } from "next/og";
  * — สร้างด้วย ImageResponse (ไม่ต้องมีไฟล์รูป) ใช้ธีมสีเดียวกับเว็บ
  * ใช้ข้อความอังกฤษล้วนเพราะ ImageResponse ไม่มีฟอนต์ไทยติดมา (ไทยจะกลายเป็นกล่อง)
  */
-export const alt = "AI Football Analytics — Pro Football Analysis Powered by AI";
+export const alt = "BALLAI365 — AI Football Analytics Powered by AI";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -41,7 +41,7 @@ export default function Image() {
               color: "#3dff8b",
             }}
           >
-            AI FOOTBALL ANALYTICS
+            BALLAI365 · AI FOOTBALL ANALYTICS
           </div>
         </div>
         <div
