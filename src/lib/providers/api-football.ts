@@ -52,6 +52,10 @@ function isNeutralVenue(leagueId: string, homeTeamName: string): boolean {
  */
 function applyLockedMarkets(f: Fixture, locked: LedgerEntry): void {
   const p = f.prediction;
+  // สกอร์ที่แสดงต้องเป็นชุดเดียวกับที่ใช้คำนวณแฮนดิแคป — ไม่งั้นสกอร์กับราคาต่อรองสวนทาง
+  // (เช่น แสดง 2-1 แต่แฮนดิแคปคำนวณจาก 2-0 → Argentina -1.25 ขัดกับชนะ 1 ลูก)
+  // ledger = แหล่งความจริงเดียวของคำทายที่ล็อก
+  p.expectedScore = { home: locked.expHome, away: locked.expAway };
   // ทับเฉพาะตลาดที่ล็อกค่าไว้จริง — ค่าที่ถูกล้าง (null) ปล่อยให้ใช้เส้นตลาดสดจาก assemble
   if (locked.ahLine != null) {
     p.handicapLine = locked.ahLine;
