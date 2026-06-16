@@ -91,6 +91,49 @@ function saveLedger(entries: LedgerEntry[]): void {
   }
 }
 
+/* --------------------------- แฮนดิแคป: แหล่งคำนวณเดียว --------------------------- */
+
+/**
+ * ฝั่งแฮนดิแคปที่เลือก = ฝั่งที่ "สกอร์ที่ทาย" คุ้มเส้น (เส้นเป็นมุมเจ้าบ้าน)
+ * derive จากสกอร์+เส้นเสมอ — ห้ามเก็บแยกเป็น snapshot เพราะจะเพี้ยนเมื่อสกอร์อัปเดต
+ * (บั๊กเดิม: record อัปเดต ahLabel แต่ไม่อัปเดต expScore → สกอร์กับราคาต่อรองสวนทาง)
+ */
+export function handicapPickSide(
+  expHome: number,
+  expAway: number,
+  ahLine: number
+): "HOME" | "AWAY" {
+  return expHome - expAway + ahLine > 0 ? "HOME" : "AWAY";
+}
+
+/** ป้ายแฮนดิแคปสำหรับแสดง จากฝั่ง+เส้น (เส้นมุมเจ้าบ้าน) */
+export function handicapLabel(
+  side: "HOME" | "AWAY",
+  homeShort: string,
+  awayShort: string,
+  ahLine: number
+): string {
+  const fmt = (n: number) => (n > 0 ? `+${n}` : `${n}`);
+  return side === "HOME"
+    ? `${homeShort} ${fmt(ahLine)}`
+    : `${awayShort} ${fmt(-ahLine)}`;
+}
+
+/** ฝั่ง+ป้าย ในครั้งเดียว — คืน null ถ้าไม่มีเส้นหรือไม่มีทีม */
+function derivedHandicap(
+  f: Fixture,
+  expHome: number,
+  expAway: number,
+  ahLine: number | null
+): { side: "HOME" | "AWAY"; label: string } | null {
+  if (ahLine == null || !f.homeTeam || !f.awayTeam) return null;
+  const side = handicapPickSide(expHome, expAway, ahLine);
+  return {
+    side,
+    label: handicapLabel(side, f.homeTeam.shortName, f.awayTeam.shortName, ahLine),
+  };
+}
+
 /* --------------------------- record (ตอนวิเคราะห์) --------------------------- */
 
 /** บันทึก/อัปเดตคำทายของคู่ที่มีผลวิเคราะห์ Claude — ห้ามแก้หลังตัดสินแล้ว */
@@ -101,6 +144,7 @@ export function recordPrediction(f: Fixture): LedgerEntry | null {
   if (existing?.settled) return existing;
 
   const p = f.prediction;
+  const ahFromScore = derivedHandicap(f, p.expectedScore.home, p.expectedScore.away, p.handicapLine);
   const entry: LedgerEntry = {
     id: f.id,
     afId: Number(f.id.slice(3)),
@@ -114,13 +158,9 @@ export function recordPrediction(f: Fixture): LedgerEntry | null {
     expHome: p.expectedScore.home,
     expAway: p.expectedScore.away,
     ahLine: p.handicapLine,
-    ahSide:
-      p.handicapPickTeam == null
-        ? null
-        : f.homeTeam && p.handicapPickTeam.includes(f.homeTeam.name)
-          ? "HOME"
-          : "AWAY",
-    ahLabel: p.handicapPickTeam,
+    // ฝั่ง+ป้าย derive จากสกอร์+เส้น (แหล่งเดียว) — ไม่ parse string ที่อาจไม่ตรงสกอร์
+    ahSide: ahFromScore?.side ?? null,
+    ahLabel: ahFromScore?.label ?? null,
     ouLine: p.overUnderLine,
     ouPick: p.overUnderPick,
     cornerLine: p.cornerLine,
@@ -139,8 +179,11 @@ export function recordPrediction(f: Fixture): LedgerEntry | null {
     existing.pickTeamName ??= entry.pickTeamName;
     if (existing.ahLine == null && entry.ahLine != null) {
       existing.ahLine = entry.ahLine;
-      existing.ahSide = entry.ahSide;
-      existing.ahLabel = entry.ahLabel;
+      // ฝั่ง/ป้าย derive จากสกอร์ที่ "ล็อกไว้" (existing) ไม่ใช่รอบที่เพิ่งเข้ามา
+      // — เส้นเพิ่งเปิดทีหลังได้ แต่สกอร์ที่ทายต้องคงเดิม
+      const ah = derivedHandicap(f, existing.expHome, existing.expAway, entry.ahLine);
+      existing.ahSide = ah?.side ?? null;
+      existing.ahLabel = ah?.label ?? null;
     }
     if (existing.ouLine == null && entry.ouLine != null) {
       existing.ouLine = entry.ouLine;
@@ -172,13 +215,9 @@ export function relockPrediction(f: Fixture): LedgerEntry | null {
   e.expHome = p.expectedScore.home;
   e.expAway = p.expectedScore.away;
   e.ahLine = p.handicapLine;
-  e.ahSide =
-    p.handicapPickTeam == null
-      ? null
-      : f.homeTeam && p.handicapPickTeam.includes(f.homeTeam.name)
-        ? "HOME"
-        : "AWAY";
-  e.ahLabel = p.handicapPickTeam;
+  const ahRelock = derivedHandicap(f, p.expectedScore.home, p.expectedScore.away, p.handicapLine);
+  e.ahSide = ahRelock?.side ?? null;
+  e.ahLabel = ahRelock?.label ?? null;
   e.ouLine = p.overUnderLine;
   e.ouPick = p.overUnderPick;
   e.cornerLine = p.cornerLine;
@@ -296,9 +335,11 @@ export function settlePending(): Promise<number> {
 
         // แฮนดิแคป — ตัดสินตามทิศทาง: ได้ครึ่งนับถูก เสียครึ่งนับผิด
         // เหลือ null เฉพาะ push เส้นเต็มพอดี (ไม่มีทิศทางให้ตัดสิน)
-        if (e.ahLine != null && e.ahSide != null) {
+        if (e.ahLine != null) {
+          // ฝั่งที่แทง derive จากสกอร์ที่ทาย+เส้น (กัน ahSide เก่าที่อาจ stale)
+          const side = handicapPickSide(e.expHome, e.expAway, e.ahLine);
           const homeAdj = h - a + e.ahLine; // ahLine มุมมองเจ้าบ้าน
-          const margin = e.ahSide === "HOME" ? homeAdj : -homeAdj;
+          const margin = side === "HOME" ? homeAdj : -homeAdj;
           e.rAh = margin === 0 ? null : margin > 0;
         } else e.rAh = null;
 

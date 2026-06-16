@@ -19,7 +19,7 @@ import * as map from "../football-mapper";
 import * as calc from "../football-calculator";
 import { deriveStatus } from "../engine/score";
 import { analyzeFixtureWithClaude, applyClaudeAnalysis, claudeEnabled } from "../claude-analyst";
-import { recordPrediction, getLedgerEntry, LedgerEntry } from "../accuracy";
+import { recordPrediction, getLedgerEntry, LedgerEntry, handicapPickSide, handicapLabel } from "../accuracy";
 import { getSettings } from "../settings";
 import { cacheGet, cachePut } from "../cache";
 import { getMatchWeather } from "../openweather";
@@ -57,9 +57,11 @@ function applyLockedMarkets(f: Fixture, locked: LedgerEntry): void {
   // ledger = แหล่งความจริงเดียวของคำทายที่ล็อก
   p.expectedScore = { home: locked.expHome, away: locked.expAway };
   // ทับเฉพาะตลาดที่ล็อกค่าไว้จริง — ค่าที่ถูกล้าง (null) ปล่อยให้ใช้เส้นตลาดสดจาก assemble
-  if (locked.ahLine != null) {
+  if (locked.ahLine != null && f.homeTeam && f.awayTeam) {
     p.handicapLine = locked.ahLine;
-    p.handicapPickTeam = locked.ahLabel;
+    // ป้าย derive จากสกอร์ที่ล็อก+เส้น (ไม่ใช้ ahLabel เก่าที่อาจไม่ตรงสกอร์)
+    const side = handicapPickSide(locked.expHome, locked.expAway, locked.ahLine);
+    p.handicapPickTeam = handicapLabel(side, f.homeTeam.shortName, f.awayTeam.shortName, locked.ahLine);
   }
   p.overUnderLine = locked.ouLine;
   p.overUnderPick = locked.ouPick;
