@@ -160,27 +160,31 @@ export function MatchOfTheDay({ fixture }: { fixture: Fixture }) {
           </div>
         </div>
 
-        {/* AI Score */}
-        <div className="glass flex flex-col items-center justify-center p-4">
-          <p className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)]">
-            AI SCORE
-          </p>
-          <ScoreRing score={p.aiScore} size={88} />
-        </div>
+        {/* มือถือ: AI Score + Confidence/Risk/Value อยู่ 2 คอลัมน์ในแถวเดียว (ลดความยาว)
+            จอใหญ่: lg:contents ทำให้ 2 กล่องนี้กลับไปเรียงในกริดหลักเหมือนเดิม */}
+        <div className="grid grid-cols-2 gap-3 lg:contents">
+          {/* AI Score */}
+          <div className="glass flex flex-col items-center justify-center p-4">
+            <p className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)]">
+              AI SCORE
+            </p>
+            <ScoreRing score={p.aiScore} size={88} />
+          </div>
 
-        {/* Confidence / Risk / Value */}
-        <div className="glass flex flex-col justify-center gap-2.5 p-4 text-[12px]">
-          <div className="flex items-center justify-between gap-6">
-            <span className="text-[var(--text-muted)]">CONFIDENCE</span>
-            <Badge tone={confidenceTone[p.confidence]}>{confidenceLabel[p.confidence]}</Badge>
-          </div>
-          <div className="flex items-center justify-between gap-6">
-            <span className="text-[var(--text-muted)]">RISK</span>
-            <Badge tone={riskTone[p.risk]}>{riskLabel[p.risk]}</Badge>
-          </div>
-          <div className="flex items-center justify-between gap-6">
-            <span className="text-[var(--text-muted)]">VALUE</span>
-            <Badge tone={valueTone[p.value]}>{valueLabel[p.value]}</Badge>
+          {/* Confidence / Risk / Value */}
+          <div className="glass flex flex-col justify-center gap-2.5 p-4 text-[12px]">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[var(--text-muted)]">CONFIDENCE</span>
+              <Badge tone={confidenceTone[p.confidence]}>{confidenceLabel[p.confidence]}</Badge>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[var(--text-muted)]">RISK</span>
+              <Badge tone={riskTone[p.risk]}>{riskLabel[p.risk]}</Badge>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[var(--text-muted)]">VALUE</span>
+              <Badge tone={valueTone[p.value]}>{valueLabel[p.value]}</Badge>
+            </div>
           </div>
         </div>
       </div>

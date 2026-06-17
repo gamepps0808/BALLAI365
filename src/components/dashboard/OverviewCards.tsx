@@ -19,21 +19,28 @@ export function OverviewCards({ stats }: { stats: OverviewStats }) {
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+    // มือถือ: ชิปกระชับ 3 คอลัมน์ (ไอคอนบน · เลขเด่น · ป้ายเล็ก) = 2 แถว ไม่รก
+    // จอใหญ่: การ์ดแนวนอนเต็มเหมือนเดิม
+    <div className="grid grid-cols-3 gap-2 sm:gap-3 xl:grid-cols-6">
       {cards.map(({ label, value, sub, icon: Icon, color }) => (
-        <div key={label} className="glass glass-hover flex items-center gap-3 p-3.5">
+        <div
+          key={label}
+          className="glass glass-hover flex flex-col items-center gap-1 p-2.5 text-center sm:flex-row sm:items-center sm:gap-3 sm:p-3.5 sm:text-left"
+        >
           <span
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full sm:h-10 sm:w-10"
             style={{ background: `color-mix(in srgb, ${color} 14%, transparent)`, color }}
           >
-            <Icon size={18} />
+            <Icon size={16} />
           </span>
           <div className="min-w-0">
-            <p className="truncate text-[11px] text-[var(--text-secondary)]">{label}</p>
-            <p className="tabular text-lg font-bold leading-tight">
-              {value}
+            <p className="tabular text-[15px] font-bold leading-tight sm:text-lg">{value}</p>
+            <p className="truncate text-[10px] text-[var(--text-secondary)] sm:text-[11px]">
+              {label}
               {sub && (
-                <span className="ml-1 text-[10px] font-normal text-[var(--text-muted)]">{sub}</span>
+                <span className="ml-1 hidden font-normal text-[var(--text-muted)] sm:inline">
+                  · {sub}
+                </span>
               )}
             </p>
           </div>
