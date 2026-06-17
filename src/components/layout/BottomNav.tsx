@@ -6,8 +6,10 @@ import { usePathname } from "next/navigation";
 import {
   Home,
   CalendarDays,
+  CalendarRange,
   Radio,
   Sparkles,
+  Star,
   Menu,
   X,
   History,
@@ -32,6 +34,8 @@ const items = [
 
 /** เมนูเต็มในแผ่น "เพิ่มเติม" — ครบทุกหน้าเหมือน sidebar เดสก์ท็อป */
 const moreItems = [
+  { href: "/fixtures", label: "โปรแกรมล่วงหน้า", icon: CalendarRange },
+  { href: "/favorites", label: "รายการโปรด", icon: Star },
   { href: "/results", label: "ผลบอลย้อนหลัง", icon: History },
   { href: "/leagues", label: "ตารางคะแนน", icon: BarChart3 },
   { href: "/handicap", label: "แฮนดิแคป", icon: Scale },
