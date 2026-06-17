@@ -20,7 +20,6 @@ export default async function BacktestPage() {
     { label: "HANDICAP", m: acc.handicap },
     { label: "OVER / UNDER", m: acc.overUnder },
     { label: "CORNERS", m: acc.corners },
-    { label: "CORRECT SCORE", m: acc.correctScore },
   ];
 
   return (
@@ -84,7 +83,6 @@ export default async function BacktestPage() {
                   <th className="px-3 py-2.5 text-center font-semibold">AH</th>
                   <th className="px-3 py-2.5 text-center font-semibold">O/U</th>
                   <th className="px-3 py-2.5 text-center font-semibold">เตะมุม</th>
-                  <th className="px-3 py-2.5 text-center font-semibold">สกอร์เป๊ะ</th>
                 </tr>
               </thead>
               <tbody>
@@ -169,7 +167,6 @@ function LedgerRow({ e }: { e: LedgerEntry }) {
       >
         <Mark v={e.rCorner} />
       </td>
-      <td className="px-3 py-2.5 text-center"><Mark v={e.rScore} /></td>
     </tr>
   );
 }

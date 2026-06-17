@@ -65,7 +65,6 @@ export default function RootLayout({
             graded: acc.overall.total,
             markets: [
               ["ทายผลชนะ (1X2)", acc.oneXTwo],
-              ["ทายสกอร์เป๊ะ", acc.correctScore],
               ["ทายสูง/ต่ำ", acc.overUnder],
               ["ทายเตะมุม", acc.corners],
               ["แฮนดิแคป", acc.handicap],
