@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
-import { Newspaper, CalendarX2, ClipboardList, Cross, CloudRain } from "lucide-react";
+import { Newspaper, CalendarX2, ClipboardList, Cross, CloudRain, ExternalLink, Globe } from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
 import { Disclaimer } from "@/components/ui/Disclaimer";
 import {
@@ -9,6 +9,7 @@ import {
   footballToday,
   footballNewDay,
 } from "@/lib/service";
+import { getFootballNews } from "@/lib/news";
 import { Fixture } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -30,11 +31,12 @@ interface NewsItem {
  * อ่านจากข้อมูลที่ดึงไว้แล้ว — ไม่เรียก Claude (0 token)
  */
 export default async function NewsPage() {
-  const [liteToday, liteNew, deepToday, deepNew] = await Promise.all([
+  const [liteToday, liteNew, deepToday, deepNew, externalNews] = await Promise.all([
     fetchLiteFixtures(footballToday()),
     fetchLiteFixtures(footballNewDay()),
     fetchFixtures(footballToday()),
     fetchFixtures(footballNewDay()),
+    getFootballNews(),
   ]);
 
   const items: NewsItem[] = [];
@@ -80,11 +82,41 @@ export default async function NewsPage() {
     <main>
       <Topbar title="ข่าวสาร" />
       <div className="space-y-4 p-4 lg:p-6">
-        <p className="flex items-center gap-2 text-[12px] text-[var(--text-secondary)]">
+        {/* ข่าวฟุตบอลต่างประเทศ (ซื้อขายนักเตะ/ข่าวทั่วไป) — RSS แปลไทย */}
+        {externalNews.length > 0 && (
+          <section className="space-y-2">
+            <h2 className="flex flex-wrap items-center gap-2 text-[13px] font-extrabold tracking-wider">
+              <span className="flex items-center gap-1.5">
+                <Globe size={15} className="text-[var(--neon-green)]" /> ข่าวฟุตบอลต่างประเทศ
+              </span>
+              <span className="text-[10px] font-normal text-[var(--text-muted)]">
+                ซื้อขายนักเตะ · ข่าวทั่วไป (แปลไทยโดย AI)
+              </span>
+            </h2>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {externalNews.map((n) => (
+                <a
+                  key={n.link}
+                  href={n.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="glass glass-hover flex flex-col p-3.5"
+                >
+                  <p className="text-[13px] font-bold leading-snug">{n.title}</p>
+                  <p className="mt-1 line-clamp-2 text-[12px] text-[var(--text-secondary)]">{n.summary}</p>
+                  <p className="mt-2 flex items-center gap-1 text-[10px] text-[var(--text-muted)]">
+                    <ExternalLink size={10} /> {n.source} — แตะอ่านต้นฉบับ
+                  </p>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <p className="flex items-center gap-2 border-t border-[var(--border-subtle)] pt-4 text-[12px] text-[var(--text-secondary)]">
           <Newspaper size={15} className="text-[var(--neon-blue)]" />
-          เหตุการณ์จริงจาก API ของโปรแกรมวันนี้และวันพรุ่งนี้{" "}
+          อัปเดตจากแมตช์ — เหตุการณ์จริงจาก API วันนี้และพรุ่งนี้{" "}
           <span className="tabular font-bold text-[var(--text-primary)]">{total} รายการ</span>
-          — อัปเดตพร้อมรอบรีเฟรชข้อมูล
         </p>
 
         {total === 0 && (
