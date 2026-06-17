@@ -1,7 +1,8 @@
 import { Fixture, LiteFixture, OverviewStats } from "./types";
 import { getDataProvider } from "./providers";
 import { cached } from "./cache";
-import { fixtures as mockFixtures, accuracy } from "./mock/data";
+import { fixtures as mockFixtures } from "./mock/data";
+import { getAccuracySummary } from "./accuracy";
 import * as api from "./api-football";
 import { mapStatus } from "./football-mapper";
 import { extractMatchWinner, extractAsianHandicap } from "./football-calculator";
@@ -112,8 +113,8 @@ export function computeOverview(fixtures: Fixture[]): OverviewStats {
     highRisk: fixtures.filter((f) =>
       ["HIGH", "VERY_HIGH"].includes(f.prediction.risk)
     ).length,
-    // accuracy comes from the backtest store (mock until results accumulate)
-    aiAccuracy7d: accuracy.overall,
+    // ความแม่นจริงจาก ledger (1X2, 7 วันล่าสุด) — null เมื่อยังไม่มีคู่ตัดสิน
+    aiAccuracy7d: getAccuracySummary().accuracy7d,
   };
 }
 

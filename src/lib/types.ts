@@ -356,7 +356,7 @@ export interface OverviewStats {
   highConfidence: number;
   valueBets: number;
   highRisk: number;
-  aiAccuracy7d: number;
+  aiAccuracy7d: number | null; // null = ยังไม่มีคู่ตัดสินใน 7 วัน
 }
 
 export interface ModelWeights {

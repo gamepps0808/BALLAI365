@@ -67,6 +67,8 @@ export interface AccuracySummary {
   corners: MarketAccuracy;
   correctScore: MarketAccuracy;
   last7Days: { date: string; accuracy: number }[];
+  /** ความแม่น 1X2 รวมใน 7 วันล่าสุด (%) — null = ยังไม่มีคู่ตัดสินในช่วงนี้ */
+  accuracy7d: number | null;
   entries: LedgerEntry[]; // ตัดสินแล้ว ใหม่→เก่า
   pending: number;
 }
@@ -449,6 +451,14 @@ export function getAccuracySummary(): AccuracySummary {
       accuracy: Math.round((d.won / d.total) * 100),
     }));
 
+  // ความแม่น 1X2 รวมใน 7 วันล่าสุด (aggregate ตามจำนวนคู่ ไม่ใช่เฉลี่ยรายวัน)
+  const cutoff = new Date(Date.now() - 7 * 86400_000).toISOString().slice(0, 10);
+  const recent = graded.filter((e) => e.r1x2 != null && (e.date ?? "") >= cutoff);
+  const accuracy7d =
+    recent.length > 0
+      ? Math.round((recent.filter((e) => e.r1x2).length / recent.length) * 100)
+      : null;
+
   const oneXTwo = market(graded, "r1x2");
   return {
     overall: oneXTwo,
@@ -458,6 +468,7 @@ export function getAccuracySummary(): AccuracySummary {
     corners: market(graded, "rCorner"),
     correctScore: market(graded, "rScore"),
     last7Days,
+    accuracy7d,
     entries: graded.slice(0, 60),
     pending,
   };

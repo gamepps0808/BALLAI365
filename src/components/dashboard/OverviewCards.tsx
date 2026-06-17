@@ -15,7 +15,7 @@ export function OverviewCards({ stats }: { stats: OverviewStats }) {
     { label: "ความมั่นใจสูง", value: `${stats.highConfidence} คู่`, icon: Gauge, color: "var(--soft-purple)" },
     { label: "Value Bet เด่น", value: `${stats.valueBets} คู่`, icon: Gem, color: "var(--gold)" },
     { label: "ความเสี่ยงสูง", value: `${stats.highRisk} คู่`, icon: TriangleAlert, color: "var(--danger)" },
-    { label: "AI Accuracy", value: `${stats.aiAccuracy7d}%`, sub: "7 วันล่าสุด", icon: Target, color: "var(--neon-blue)" },
+    { label: "AI Accuracy", value: stats.aiAccuracy7d != null ? `${stats.aiAccuracy7d}%` : "—", sub: "ทายผล 7 วันล่าสุด", icon: Target, color: "var(--neon-blue)" },
   ];
 
   return (
