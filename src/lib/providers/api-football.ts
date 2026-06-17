@@ -19,7 +19,7 @@ import * as map from "../football-mapper";
 import * as calc from "../football-calculator";
 import { deriveStatus } from "../engine/score";
 import { analyzeFixtureWithClaude, applyClaudeAnalysis, claudeEnabled } from "../claude-analyst";
-import { recordPrediction, getLedgerEntry, LedgerEntry, handicapPickSide, handicapLabel } from "../accuracy";
+import { recordPrediction, getLedgerEntry, LedgerEntry, handicapPickSide, handicapLabel, effectiveOuPick } from "../accuracy";
 import { getSettings } from "../settings";
 import { cacheGet, cachePut } from "../cache";
 import { getMatchWeather } from "../openweather";
@@ -61,11 +61,22 @@ function applyLockedMarkets(f: Fixture, locked: LedgerEntry): void {
     p.handicapPickTeam = handicapLabel(side, f.homeTeam.shortName, f.awayTeam.shortName, locked.ahLine);
   }
   p.overUnderLine = locked.ouLine;
-  p.overUnderPick = locked.ouPick;
-  if (locked.ouLine != null)
-    p.overUnderNote = locked.finalizedAt
-      ? "อัปเดตรอบสุดท้ายก่อนเตะ ✓"
-      : "ล็อกตามที่วิเคราะห์ไว้ก่อนเตะ";
+  // ฝั่งสูง/ต่ำ: ใช้เส้นที่ล็อก แต่ถ้าขัดกับสกอร์ที่ทายชัดเจน ให้อิงสกอร์ (helper เดียวกับ settle)
+  const ouPick = effectiveOuPick(
+    p.expectedScore.home,
+    p.expectedScore.away,
+    locked.ouLine,
+    locked.ouPick
+  );
+  p.overUnderPick = ouPick;
+  if (locked.ouLine != null) {
+    p.overUnderNote =
+      ouPick !== locked.ouPick
+        ? `อิงสกอร์ที่ทาย (${p.expectedScore.home}-${p.expectedScore.away} รวม ${p.expectedScore.home + p.expectedScore.away})`
+        : locked.finalizedAt
+          ? "อัปเดตรอบสุดท้ายก่อนเตะ ✓"
+          : "ล็อกตามที่วิเคราะห์ไว้ก่อนเตะ";
+  }
   p.cornerLine = locked.cornerLine;
   p.cornerPick = locked.cornerPick;
 }

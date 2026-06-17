@@ -119,6 +119,23 @@ export function handicapLabel(
     : `${awayShort} ${fmt(-ahLine)}`;
 }
 
+/**
+ * ฝั่งสูง/ต่ำที่ใช้จริง — ถ้าสกอร์รวมที่ทายห่างเส้นชัดเจน (>0.3) แต่ pick ที่ล็อกไว้สวนทาง
+ * ให้อิงสกอร์ (เช่น ทาย 1-0 รวม 1 แต่ค่าค้าง Over 2.25 → Under) · กฎเดียวกับตอนวิเคราะห์
+ * เพื่อให้หน้าจอแสดง · การตัดสินผล ตรงกันเสมอ
+ */
+export function effectiveOuPick(
+  expHome: number,
+  expAway: number,
+  ouLine: number | null,
+  stored: "OVER" | "UNDER" | null
+): "OVER" | "UNDER" | null {
+  if (ouLine == null) return stored;
+  const d = expHome + expAway - ouLine;
+  const scoreSide = d > 0.3 ? "OVER" : d < -0.3 ? "UNDER" : null;
+  return scoreSide && stored !== scoreSide ? scoreSide : stored;
+}
+
 /** ฝั่ง+ป้าย ในครั้งเดียว — คืน null ถ้าไม่มีเส้นหรือไม่มีทีม */
 function derivedHandicap(
   f: Fixture,
@@ -349,10 +366,11 @@ export function settlePending(): Promise<number> {
 
         // สูงต่ำ — ตัดสินตามทิศทางเช่นกัน เช่น เส้น 2.25 ยิง 2 ลูก:
         // เล่นต่ำได้ครึ่ง = ถูก, เล่นสูงเสียครึ่ง = ผิด · push เส้นเต็มพอดีเท่านั้นที่ไม่นับ
-        if (e.ouLine != null && e.ouPick != null) {
+        const ouPick = effectiveOuPick(e.expHome, e.expAway, e.ouLine, e.ouPick);
+        if (e.ouLine != null && ouPick != null) {
           const total = h + a;
           e.rOu =
-            total === e.ouLine ? null : (total > e.ouLine) === (e.ouPick === "OVER");
+            total === e.ouLine ? null : (total > e.ouLine) === (ouPick === "OVER");
         } else e.rOu = null;
 
         // เตะมุม — ต้องดึงสถิติแมตช์เพิ่ม เฉพาะคู่ที่มีคำทาย
