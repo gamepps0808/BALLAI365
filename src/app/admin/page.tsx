@@ -86,7 +86,6 @@ export default function AdminPage() {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function login() {
