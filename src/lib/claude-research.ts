@@ -72,6 +72,9 @@ function cleanSummary(s: string): string {
 export async function researchExternalViews(
   fixture: Fixture
 ): Promise<ExternalResearch | null> {
+  // ปิดเป็นค่าเริ่มต้น (web search มีค่าใช้จ่ายเพิ่ม ~$0.21/คู่)
+  // เปิดใช้: ตั้ง ENABLE_WEB_SEARCH=1 ใน .env
+  if (process.env.ENABLE_WEB_SEARCH !== "1") return null;
   if (!process.env.ANTHROPIC_API_KEY) return null;
 
   return cached(`research:${fixture.id}`, 6 * 3600, async () => {
