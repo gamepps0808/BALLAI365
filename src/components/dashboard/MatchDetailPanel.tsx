@@ -7,6 +7,7 @@ import { Fixture } from "@/lib/types";
 import { TeamLogo } from "../ui/TeamLogo";
 import { PlayerPhoto } from "../ui/PlayerPhoto";
 import { TacticalOverview } from "../match/TacticalOverview";
+import { MatchStatsPanel } from "../match/MatchStatsPanel";
 
 const tabs = ["สถิติ", "ฟอร์ม", "H2H", "ผู้เล่น", "ข่าวสาร"] as const;
 
@@ -43,6 +44,9 @@ export function MatchDetailPanel({ fixture }: { fixture: Fixture }) {
         {tab === "ผู้เล่น" && <PlayersTab fixture={fixture} />}
         {tab === "ข่าวสาร" && <NewsTab fixture={fixture} />}
       </section>
+
+      {/* สถิติในเกม — เฉพาะเมื่อบอลเริ่มเตะแล้ว (LIVE/FINISHED) */}
+      <MatchStatsPanel fixture={fixture} />
 
       {/* แผนการเล่นจาก lineups จริง */}
       <TacticalOverview fixture={fixture} />
