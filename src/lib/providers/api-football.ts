@@ -173,7 +173,8 @@ export class ApiFootballProvider implements FootballDataProvider {
           .slice(0, Math.max(getSettings().claudeLimit, 1));
         await Promise.all(
           candidates.map(async (f) => {
-            const analysis = await analyzeFixtureWithClaude(f);
+            // คู่หน้าหลักที่ AI คัด → ค้นทรรศนะเว็บต่างประเทศมาประกอบด้วย
+            const analysis = await analyzeFixtureWithClaude(f, { research: true });
             if (analysis) {
               applyClaudeAnalysis(f, analysis);
               // ลง ledger ความแม่น (ล็อกครั้งแรก) — ตัดสินหลังจบแมตช์

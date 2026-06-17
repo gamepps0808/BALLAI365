@@ -5,7 +5,8 @@ import { cached } from "./cache";
 import { loadSavedAnalysis, saveAnalysis } from "./claude-store";
 import { buildSelfReview } from "./accuracy";
 import { computeValue } from "./football-calculator";
-import { Fixture, PickSide } from "./types";
+import { researchExternalViews, loadResearch } from "./claude-research";
+import { Fixture, PickSide, ExternalResearch } from "./types";
 
 /**
  * Claude AI Analyst — ส่งข้อมูลจริงทั้งหมดของแมตช์ (ฟอร์ม สถิติ H2H ราคา
@@ -49,6 +50,18 @@ const AnalysisSchema = z.object({
       away: z.number().int().nullable(),
     })
     .describe("อันดับโลก FIFA ล่าสุดที่รู้ (เฉพาะทีมชาติ) — null ถ้าเป็นสโมสรหรือไม่มั่นใจ"),
+  underdogAssessmentTh: z
+    .string()
+    .nullable()
+    .describe("ประเมินบอลรอง 1-2 ประโยค: ทีมรองมีลุ้นชนะ/ยันเสมอไหม เพราะอะไร — null ถ้าไม่มีฝั่งรองชัดเจน (สูสีจริง)"),
+  drawAssessmentTh: z
+    .string()
+    .nullable()
+    .describe("ประเมินโอกาสเสมอ 1 ประโยค: เกมนี้มีโอกาสจบเสมอแค่ไหน — null ถ้าโอกาสเสมอต่ำมาก"),
+  handicapAssessmentTh: z
+    .string()
+    .nullable()
+    .describe("ประเมินแฮนดิแคป 1-2 ประโยค: ตัวเต็งกินลูกต่อได้ไหม หรือควรเล่นฝั่งรอง+ลูก — null ถ้าไม่มีตลาดแฮนดิแคป"),
 });
 
 export type ClaudeAnalysis = z.infer<typeof AnalysisSchema>;
@@ -67,7 +80,9 @@ const SYSTEM_PROMPT = `คุณคือนักวิเคราะห์ฟ
 6. ดู field "venue" — ถ้าเป็นสนามกลาง ห้ามให้เหตุผลเรื่องความได้เปรียบเจ้าบ้าน/เจ้าภาพกับทีมแรกเด็ดขาด และห้ามเรียกทีมแรกว่า "เจ้าบ้าน" หรือทีมที่สองว่า "ทีมเยือน" — ให้เรียกชื่อทีมตรง ๆ แทน
 7. keyPlayers: ระบุนักเตะตัวความหวังของแต่ละทีมเฉพาะที่คุณรู้จริงว่าอยู่ทีมชุดปัจจุบัน — ไม่มั่นใจให้ตอบ null ห้ามเดาชื่อ
 8. overUnderPick: ถ้าข้อมูลมี odds.overUnder ต้องเลือก OVER หรือ UNDER เสมอ (ห้าม null) โดยตัดสินจาก "แนวโน้มประตูรวมทั้งเกม" — ค่าเฉลี่ยประตูได้/เสียของสองทีม ราคาตลาด สภาพอากาศ ไม่ใช่แค่ผลรวมของสกอร์ที่ทาย
-9. fifaRanks: ทีมชาติให้ระบุอันดับโลก FIFA ล่าสุดที่คุณรู้ (ประมาณต้นปี 2026 ได้) — สโมสรหรือไม่มั่นใจให้ null`;
+9. fifaRanks: ทีมชาติให้ระบุอันดับโลก FIFA ล่าสุดที่คุณรู้ (ประมาณต้นปี 2026 ได้) — สโมสรหรือไม่มั่นใจให้ null
+10. underdogAssessmentTh / drawAssessmentTh / handicapAssessmentTh: ประเมินตรงไปตรงมาเรื่องบอลรอง โอกาสเสมอ และการกินลูกต่อ — อิงข้อมูลจริง ไม่เชียร์ฝั่งใด ตอบ null เมื่อไม่มีประเด็นนั้นจริง
+11. ถ้ามี field "externalResearch" (ทรรศนะที่ค้นจากเว็บต่างประเทศ) ให้ใช้เป็น "ข้อมูลเสริม" ประกอบ โดยเฉพาะข่าวเจ็บ/แบนล่าสุดและมุมมองแท็กติก — แต่ห้ามให้ทรรศนะเว็บลบล้างข้อมูลตัวเลขจริง (ฟอร์ม/ราคา/สถิติ) ถ้าขัดกันให้ยึดตัวเลขจริงเป็นหลักและระบุไว้ในเหตุผล`;
 
 export function claudeEnabled(): boolean {
   return !!process.env.ANTHROPIC_API_KEY;
@@ -75,7 +90,7 @@ export function claudeEnabled(): boolean {
 
 export async function analyzeFixtureWithClaude(
   fixture: Fixture,
-  opts?: { force?: boolean }
+  opts?: { force?: boolean; research?: boolean }
 ): Promise<ClaudeAnalysis | null> {
   if (!claudeEnabled()) return null;
 
@@ -87,6 +102,10 @@ export async function analyzeFixtureWithClaude(
     if (saved) return saved;
 
     try {
+      // เฟส 1 (เฉพาะคู่หน้าหลัก): ค้นทรรศนะจากเว็บต่างประเทศมาประกอบ
+      // แยกจากเฟสวิเคราะห์เพราะ citations ชนกับ structured output
+      const research = opts?.research ? await researchExternalViews(fixture) : null;
+
       const client = new Anthropic();
       // ป้อนผลงานย้อนหลังกลับเข้า prompt — Claude เห็นจุดอ่อนตัวเองแล้วปรับ
       // (คืน null เมื่อข้อมูลยังไม่พอ — ไม่เสี่ยง over-correct จากฐานเล็ก)
@@ -103,7 +122,7 @@ export async function analyzeFixtureWithClaude(
               fixture.neutralVenue
                 ? `⚠️ แมตช์นี้เตะที่สนามกลาง — field "home"/"away" ในข้อมูลเป็นเพียงลำดับทีมในโปรแกรม ไม่ใช่เจ้าบ้านจริง ห้ามใช้คำว่า "เจ้าบ้าน" "ทีมเยือน" "เหย้า" "เยือน" ในเหตุผลเด็ดขาด ให้เรียกชื่อทีม "${fixture.homeTeam.name}" และ "${fixture.awayTeam.name}" ตรง ๆ\n\n`
                 : ""
-            }${selfReview ? `${selfReview}\n\n` : ""}วิเคราะห์แมตช์นี้และทายสกอร์:\n${JSON.stringify(buildMatchFacts(fixture), null, 1)}`,
+            }${selfReview ? `${selfReview}\n\n` : ""}วิเคราะห์แมตช์นี้และทายสกอร์:\n${JSON.stringify(buildMatchFacts(fixture, research), null, 1)}`,
           },
         ],
         output_config: { format: zodOutputFormat(AnalysisSchema) },
@@ -159,10 +178,13 @@ function validationError(a: ClaudeAnalysis): string | null {
 }
 
 /** compact, factual payload — only data we actually have */
-function buildMatchFacts(f: Fixture) {
+function buildMatchFacts(f: Fixture, research?: ExternalResearch | null) {
   const p = f.prediction;
   return {
     league: f.league.name,
+    externalResearch: research
+      ? `ทรรศนะ/ข่าวจากเว็บต่างประเทศ (ข้อมูลเสริม ห้ามลบล้างตัวเลขจริง): ${research.summaryTh}`
+      : undefined,
     venue: f.neutralVenue
       ? `สนามกลาง — ${f.homeTeam.name} ไม่ใช่เจ้าบ้านจริง ไม่มีความได้เปรียบเจ้าภาพ`
       : `${f.homeTeam.name} เป็นเจ้าบ้าน`,
@@ -271,6 +293,12 @@ export function applyClaudeAnalysis(fixture: Fixture, a: ClaudeAnalysis): void {
   // อันดับโลก FIFA (ทีมชาติ) — API ไม่มีข้อมูลนี้ ใช้จาก Claude
   if (a.fifaRanks?.home) fixture.homeTeam.fifaRank = a.fifaRanks.home;
   if (a.fifaRanks?.away) fixture.awayTeam.fifaRank = a.fifaRanks.away;
+
+  // ประเมินบอลรอง/เสมอ/แฮนดิแคป + ทรรศนะที่ค้นจากเว็บ (ถ้ามี — เฉพาะคู่หน้าหลัก)
+  p.underdogAssessmentTh = a.underdogAssessmentTh ?? null;
+  p.drawAssessmentTh = a.drawAssessmentTh ?? null;
+  p.handicapAssessmentTh = a.handicapAssessmentTh ?? null;
+  p.externalResearch = loadResearch(fixture.id);
 
   const sideName = (s: PickSide) =>
     s === "HOME" ? fixture.homeTeam.shortName : s === "AWAY" ? fixture.awayTeam.shortName : "เสมอ";

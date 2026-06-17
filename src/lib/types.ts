@@ -239,6 +239,20 @@ export interface Prediction {
   riskFactors: string[];
   warning: string;
   modelOutputs: ModelOutput[];
+  /** ทรรศนะรวมจากเว็บต่างประเทศ (web search) — null/undefined = ไม่ได้ค้น (คู่ที่ไม่ใช่หน้าหลัก) */
+  externalResearch?: ExternalResearch | null;
+  /** ประเมินบอลรอง: มีลุ้นไหม เพราะอะไร (เมื่อมี research) */
+  underdogAssessmentTh?: string | null;
+  /** ประเมินโอกาสเสมอ (เมื่อมี research) */
+  drawAssessmentTh?: string | null;
+  /** ตัวเต็งกินลูกต่อได้ไหม หรือควรเล่นรอง+ลูก (เมื่อมี research) */
+  handicapAssessmentTh?: string | null;
+}
+
+/** ทรรศนะที่ Claude ค้นจากเว็บต่างประเทศที่น่าเชื่อถือ มาประกอบการวิเคราะห์ */
+export interface ExternalResearch {
+  summaryTh: string; // สรุปมุมมองรวม ภาษาไทย
+  sources: { title: string; url: string }[]; // แหล่งอ้างอิง (โปร่งใส ตรวจสอบได้)
 }
 
 export interface ModelOutput {

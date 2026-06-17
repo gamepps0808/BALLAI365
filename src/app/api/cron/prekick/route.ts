@@ -96,8 +96,8 @@ export async function GET(request: NextRequest) {
       fixture = await provider.getFixtureById(c.id);
       if (!fixture) continue;
 
-      // วิเคราะห์ใหม่ด้วยข้อมูลสดทั้งหมด (force = ข้ามผลเดิม) แล้วล็อกรอบสุดท้าย
-      const analysis = await analyzeFixtureWithClaude(fixture, { force: true });
+      // วิเคราะห์ใหม่ด้วยข้อมูลสดทั้งหมด (force = ข้ามผลเดิม) + ค้นทรรศนะเว็บล่าสุด แล้วล็อกรอบสุดท้าย
+      const analysis = await analyzeFixtureWithClaude(fixture, { force: true, research: true });
       if (!analysis) continue;
       applyClaudeAnalysis(fixture, analysis);
       relockPrediction(fixture);

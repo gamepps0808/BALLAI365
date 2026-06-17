@@ -9,6 +9,8 @@ import {
   TriangleAlert,
   CloudRain,
   Database,
+  Globe,
+  Link2,
 } from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
 import { Disclaimer } from "@/components/ui/Disclaimer";
@@ -546,6 +548,74 @@ export default async function MatchDetailPage({
             </div>
             <p className="mt-4 text-[11px] text-[var(--text-muted)]">{p.warning}</p>
           </section>
+
+          {/* ============ 9. ทรรศนะหลายแหล่ง + ประเมินเชิงลึก (เฉพาะคู่หน้าหลัก) ============ */}
+          {(p.externalResearch ||
+            p.underdogAssessmentTh ||
+            p.drawAssessmentTh ||
+            p.handicapAssessmentTh) && (
+            <section className="glass p-4 lg:col-span-2">
+              <h2 className="text-[13px] font-extrabold tracking-wider">
+                <span className="mr-1 text-[var(--neon-green)]">▎</span>ทรรศนะหลายแหล่ง + ประเมินเชิงลึก
+              </h2>
+              <div className="mt-3 grid gap-4 lg:grid-cols-2">
+                <div className="space-y-3">
+                  {p.underdogAssessmentTh && (
+                    <div>
+                      <p className="text-[11px] font-bold text-[var(--neon-blue)]">บอลรองมีลุ้นไหม</p>
+                      <p className="mt-1 text-[12px] text-[var(--text-secondary)]">{p.underdogAssessmentTh}</p>
+                    </div>
+                  )}
+                  {p.drawAssessmentTh && (
+                    <div>
+                      <p className="text-[11px] font-bold text-[var(--neon-blue)]">โอกาสเสมอ</p>
+                      <p className="mt-1 text-[12px] text-[var(--text-secondary)]">{p.drawAssessmentTh}</p>
+                    </div>
+                  )}
+                  {p.handicapAssessmentTh && (
+                    <div>
+                      <p className="text-[11px] font-bold text-[var(--neon-blue)]">ราคาต่อรอง — กินลูกต่อได้ไหม</p>
+                      <p className="mt-1 text-[12px] text-[var(--text-secondary)]">{p.handicapAssessmentTh}</p>
+                    </div>
+                  )}
+                </div>
+
+                {p.externalResearch && (
+                  <div>
+                    <p className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--neon-green)]">
+                      <Globe size={13} /> ทรรศนะจากเว็บต่างประเทศ
+                    </p>
+                    <p className="mt-2 whitespace-pre-line text-[12px] text-[var(--text-secondary)]">
+                      {p.externalResearch.summaryTh}
+                    </p>
+                    {p.externalResearch.sources.length > 0 && (
+                      <div className="mt-2.5">
+                        <p className="text-[10px] font-bold text-[var(--text-muted)]">แหล่งอ้างอิง</p>
+                        <ul className="mt-1 space-y-1">
+                          {p.externalResearch.sources.map((s) => (
+                            <li key={s.url}>
+                              <a
+                                href={s.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 text-[11px] text-[var(--neon-blue)] hover:underline"
+                              >
+                                <Link2 size={11} className="shrink-0" />
+                                <span className="truncate">{s.title}</span>
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    <p className="mt-2 text-[10px] text-[var(--text-muted)]">
+                      ทรรศนะเป็นข้อมูลเสริม — AI ยึดข้อมูลจริง (ฟอร์ม/ราคา/สถิติ) เป็นหลัก
+                    </p>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
         </div>
 
         <DevDebugPanel status={fixture.endpointStatus} />
