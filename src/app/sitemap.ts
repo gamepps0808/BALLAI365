@@ -9,7 +9,7 @@ import { SITE_URL } from "@/lib/seo";
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
   // หน้าที่อัปเดตบ่อย (รายวัน/ราย ชม.) ให้ priority สูงและ changeFrequency ถี่
-  const hourly = ["", "/matches", "/live", "/ai-picks"];
+  const hourly = ["", "/matches", "/fixtures", "/live", "/ai-picks"];
   const daily = [
     "/handicap",
     "/over-under",

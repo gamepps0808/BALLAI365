@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   Home,
   CalendarDays,
+  CalendarRange,
   History,
   Radio,
   Sparkles,
@@ -30,6 +31,7 @@ export interface SidebarAccuracy {
 const menu = [
   { href: "/", label: "หน้าหลัก", icon: Home },
   { href: "/matches", label: "แมตช์วันนี้", icon: CalendarDays },
+  { href: "/fixtures", label: "โปรแกรมล่วงหน้า", icon: CalendarRange },
   { href: "/results", label: "ผลบอลย้อนหลัง", icon: History },
   { href: "/live", label: "แมตช์สด", icon: Radio },
   { href: "/ai-picks", label: "AI แนะนำ", icon: Sparkles },
