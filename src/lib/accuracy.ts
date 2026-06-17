@@ -169,22 +169,14 @@ export function recordPrediction(f: Fixture): LedgerEntry | null {
   };
 
   if (existing) {
-    // คำทายล็อกตั้งแต่บันทึกครั้งแรก — ห้ามขยับตามราคาตลาดที่เปลี่ยนทีหลัง
-    // เติมได้เฉพาะช่องที่ยังว่าง (เคสตลาดเพิ่งเปิดราคาหลังวิเคราะห์รอบแรก)
     existing.date ??= entry.date;
     existing.kickoff ??= entry.kickoff;
     existing.league ??= entry.league;
     existing.home ??= entry.home;
     existing.away ??= entry.away;
-    existing.pickTeamName ??= entry.pickTeamName;
-    if (existing.ahLine == null && entry.ahLine != null) {
-      existing.ahLine = entry.ahLine;
-      // ฝั่ง/ป้าย derive จากสกอร์ที่ "ล็อกไว้" (existing) ไม่ใช่รอบที่เพิ่งเข้ามา
-      // — เส้นเพิ่งเปิดทีหลังได้ แต่สกอร์ที่ทายต้องคงเดิม
-      const ah = derivedHandicap(f, existing.expHome, existing.expAway, entry.ahLine);
-      existing.ahSide = ah?.side ?? null;
-      existing.ahLabel = ah?.label ?? null;
-    }
+
+    // เส้นราคา = ล็อกครั้งแรก (ราคาตลาดไม่เต้นตามที่เปลี่ยนทีหลัง)
+    if (existing.ahLine == null && entry.ahLine != null) existing.ahLine = entry.ahLine;
     if (existing.ouLine == null && entry.ouLine != null) {
       existing.ouLine = entry.ouLine;
       existing.ouPick = entry.ouPick;
@@ -192,6 +184,18 @@ export function recordPrediction(f: Fixture): LedgerEntry | null {
     if (existing.cornerLine == null && entry.cornerLine != null) {
       existing.cornerLine = entry.cornerLine;
       existing.cornerPick = entry.cornerPick;
+    }
+
+    // คำวิเคราะห์ Claude (สกอร์/ผล/ฝั่งแฮนดิแคป) = ยึดผลล่าสุดเสมอ จนกว่าจะ finalize ก่อนเตะ
+    // → สกอร์ที่แสดง · ราคาต่อรอง · ข้อความ ตรงกับที่ Claude คิดล่าสุดทั้งหมด (ไม่ค้างค่าเก่า)
+    if (!existing.finalizedAt) {
+      existing.expHome = p.expectedScore.home;
+      existing.expAway = p.expectedScore.away;
+      existing.pickSide = p.pick;
+      existing.pickTeamName = p.pickTeamName ?? existing.pickTeamName;
+      const ah = derivedHandicap(f, existing.expHome, existing.expAway, existing.ahLine);
+      existing.ahSide = ah?.side ?? null;
+      existing.ahLabel = ah?.label ?? null;
     }
     saveLedger(ledger);
     return existing;

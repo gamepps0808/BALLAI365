@@ -52,15 +52,12 @@ function isNeutralVenue(leagueId: string, homeTeamName: string): boolean {
  */
 function applyLockedMarkets(f: Fixture, locked: LedgerEntry): void {
   const p = f.prediction;
-  // สกอร์ที่แสดงต้องเป็นชุดเดียวกับที่ใช้คำนวณแฮนดิแคป — ไม่งั้นสกอร์กับราคาต่อรองสวนทาง
-  // (เช่น แสดง 2-1 แต่แฮนดิแคปคำนวณจาก 2-0 → Argentina -1.25 ขัดกับชนะ 1 ลูก)
-  // ledger = แหล่งความจริงเดียวของคำทายที่ล็อก
-  p.expectedScore = { home: locked.expHome, away: locked.expAway };
-  // ทับเฉพาะตลาดที่ล็อกค่าไว้จริง — ค่าที่ถูกล้าง (null) ปล่อยให้ใช้เส้นตลาดสดจาก assemble
+  // ไม่ทับสกอร์แล้ว — ยึดผล Claude ล่าสุด (applyClaudeAnalysis ตั้งไว้) เพื่อให้
+  // สกอร์ที่แสดง · ราคาต่อรอง · ข้อความ ตรงกันทั้งหมด (ledger ก็ sync ตาม Claude แล้ว)
+  // ล็อกเฉพาะ "เส้นราคา" จากตลาด — ส่วนฝั่งที่แทง derive จากสกอร์ Claude ปัจจุบัน
   if (locked.ahLine != null && f.homeTeam && f.awayTeam) {
     p.handicapLine = locked.ahLine;
-    // ป้าย derive จากสกอร์ที่ล็อก+เส้น (ไม่ใช้ ahLabel เก่าที่อาจไม่ตรงสกอร์)
-    const side = handicapPickSide(locked.expHome, locked.expAway, locked.ahLine);
+    const side = handicapPickSide(p.expectedScore.home, p.expectedScore.away, locked.ahLine);
     p.handicapPickTeam = handicapLabel(side, f.homeTeam.shortName, f.awayTeam.shortName, locked.ahLine);
   }
   p.overUnderLine = locked.ouLine;
