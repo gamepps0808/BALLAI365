@@ -33,7 +33,7 @@ const items = [
 /** เมนูเต็มในแผ่น "เพิ่มเติม" — ครบทุกหน้าเหมือน sidebar เดสก์ท็อป */
 const moreItems = [
   { href: "/results", label: "ผลบอลย้อนหลัง", icon: History },
-  { href: "/leagues", label: "วิเคราะห์ลีก", icon: BarChart3 },
+  { href: "/leagues", label: "ตารางคะแนน", icon: BarChart3 },
   { href: "/handicap", label: "แฮนดิแคป", icon: Scale },
   { href: "/over-under", label: "สูง / ต่ำ", icon: ArrowUpDown },
   { href: "/corners", label: "เตะมุม", icon: Flag },

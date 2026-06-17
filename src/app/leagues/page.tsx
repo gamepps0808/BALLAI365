@@ -46,7 +46,7 @@ export default async function LeaguesPage({
 
   return (
     <main>
-      <Topbar title="วิเคราะห์ลีก" />
+      <Topbar title="ตารางคะแนน" />
       <div className="space-y-4 p-4 lg:p-6">
         {/* ตัวเลือกลีก */}
         <div className="flex flex-wrap gap-2">

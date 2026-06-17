@@ -183,7 +183,7 @@ export async function getStandings(leagueId: number, season: number) {
   return map;
 }
 
-/** 8b. ตารางคะแนนแบบรักษากลุ่ม — ใช้กับหน้าวิเคราะห์ลีก (บอลโลก = หลายกลุ่ม)
+/** 8b. ตารางคะแนนแบบรักษากลุ่ม — ใช้กับหน้าตารางคะแนน (บอลโลก = หลายกลุ่ม)
  *  cache สั้นกว่าตัววิเคราะห์ (1 ชม. + key แยก) — แต้มหลังบอลจบต้องขึ้นไว */
 export async function getStandingsGroups(
   leagueId: number,

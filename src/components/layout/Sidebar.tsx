@@ -37,7 +37,7 @@ const menu = [
   { href: "/live", label: "แมตช์สด", icon: Radio },
   { href: "/ai-picks", label: "AI แนะนำ", icon: Sparkles },
   { href: "/favorites", label: "รายการโปรด", icon: Star },
-  { href: "/leagues", label: "วิเคราะห์ลีก", icon: BarChart3 },
+  { href: "/leagues", label: "ตารางคะแนน", icon: BarChart3 },
   { href: "/handicap", label: "แฮนดิแคป", icon: Scale },
   { href: "/over-under", label: "สูง / ต่ำ", icon: ArrowUpDown },
   { href: "/corners", label: "เตะมุม", icon: Flag },
