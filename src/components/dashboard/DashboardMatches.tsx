@@ -18,11 +18,14 @@ export function DashboardMatches({
   newDayLabel: string;
 }) {
   const motd = fixtures.find((f) => f.isMatchOfTheDay) ?? fixtures[0];
-  const [selected, setSelected] = useState<Fixture>(motd);
+  // เก็บแค่ id ที่เลือก แล้ว derive fixture สดจาก props เสมอ —
+  // ตอน AutoRefresh ดึงข้อมูลใหม่ (สกอร์/นาทีสด) การ์ดจะอัปเดตตาม ไม่ค้าง object เก่า
+  const [selectedId, setSelectedId] = useState<string>(motd.id);
+  const selected = fixtures.find((f) => f.id === selectedId) ?? motd;
   const heroRef = useRef<HTMLDivElement>(null);
 
   const handleSelect = (f: Fixture) => {
-    setSelected(f);
+    setSelectedId(f.id);
     heroRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
