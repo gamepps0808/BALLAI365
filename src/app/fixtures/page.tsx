@@ -41,7 +41,7 @@ export default async function FixturesPage({
   const { date } = await searchParams;
   const selected = date && days.includes(date) ? date : base;
 
-  const res = await fetchLiteFixtures(selected);
+  const res = await fetchLiteFixtures(selected, { includeScheduled: true });
 
   // จัดกลุ่มตามลีก เรียงตามความสำคัญ + เวลาเตะ
   const groups = new Map<string, LiteFixture[]>();

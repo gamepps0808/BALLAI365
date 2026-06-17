@@ -293,9 +293,17 @@ export function MatchScanner({
                 </span>
                 <ScoreRing score={p.aiScore} size={36} label="" />
               </div>
-              <p className="mt-1 text-[13px] font-bold">
-                {home.shortName} <span className="text-[var(--text-muted)]">vs</span> {away.shortName}
-              </p>
+              <div className="mt-1.5 flex items-center gap-2 text-[13px] font-bold">
+                <span className="flex min-w-0 items-center gap-1.5">
+                  <TeamLogo teamId={home.id} shortName={home.shortName} logo={home.logo} size={20} />
+                  <span className="truncate">{home.shortName}</span>
+                </span>
+                <span className="shrink-0 text-[11px] font-normal text-[var(--text-muted)]">vs</span>
+                <span className="flex min-w-0 items-center gap-1.5">
+                  <TeamLogo teamId={away.id} shortName={away.shortName} logo={away.logo} size={20} />
+                  <span className="truncate">{away.shortName}</span>
+                </span>
+              </div>
               <p className="mt-0.5 text-[12px] text-[var(--neon-green)]">
                 {market === "ou" && p.overUnderPick != null && p.overUnderLine != null
                   ? `สูง/ต่ำ: ${p.overUnderPick === "OVER" ? "Over" : "Under"} ${p.overUnderLine} · `

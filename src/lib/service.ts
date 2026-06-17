@@ -8,6 +8,7 @@ import { mapStatus } from "./football-mapper";
 import { extractMatchWinner, extractAsianHandicap } from "./football-calculator";
 import { selectBigMatches } from "./big-match-selector";
 import { loadSavedAnalysis } from "./claude-store";
+import { leagueRank } from "./league-priority";
 
 /**
  * Service layer between pages/API routes and the data provider.
@@ -163,7 +164,10 @@ export async function fetchFeaturedFixtures(
   };
 }
 
-export async function fetchLiteFixtures(date?: string): Promise<LiteResult> {
+export async function fetchLiteFixtures(
+  date?: string,
+  opts?: { includeScheduled?: boolean }
+): Promise<LiteResult> {
   const day = date ?? footballToday();
   try {
     // /odds?date ใช้วันที่ UTC แต่โปรแกรมใช้วันที่ไทย (UTC+7) —
@@ -181,8 +185,15 @@ export async function fetchLiteFixtures(date?: string): Promise<LiteResult> {
     );
 
     const lite: LiteFixture[] = rawFixtures
-      // แสดงเฉพาะคู่ที่ตลาดเปิดราคา (คู่ที่มีความหมาย) — กันรายการพัน ๆ คู่
-      .filter((f) => oddsByFixture.has(f.fixture.id))
+      // แสดงคู่ที่ตลาดเปิดราคา (คู่ที่มีความหมาย) — กันรายการพัน ๆ คู่
+      // หน้าโปรแกรมล่วงหน้า (includeScheduled) เพิ่มคู่ลีกใหญ่ที่ราคายังไม่เปิด
+      // เพื่อให้เห็นตารางแข่งล่วงหน้าได้ แม้เจ้ามือยังไม่ออกราคา
+      .filter(
+        (f) =>
+          oddsByFixture.has(f.fixture.id) ||
+          (opts?.includeScheduled &&
+            leagueRank(f.league.name, f.league.country) < 99)
+      )
       .map((f) => {
         const bookmakers = oddsByFixture.get(f.fixture.id)!;
         const mw = extractMatchWinner(bookmakers);
