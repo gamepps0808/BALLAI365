@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { matchJsonLd } from "@/lib/jsonld";
+import { FavoriteStar } from "@/components/ui/FavoriteStar";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -91,12 +92,24 @@ export default async function MatchDetailPage({
       {fixture.status === "LIVE" && <AutoRefresh seconds={60} />}
       <Topbar title={`${home.shortName} vs ${away.shortName}`} />
       <div className="space-y-4 p-4 lg:p-6">
+        <div className="flex items-center justify-between gap-3">
         <Link
           href="/"
           className="inline-flex items-center gap-1.5 text-[12px] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
         >
           <ArrowLeft size={14} /> กลับหน้าหลัก
         </Link>
+        <FavoriteStar
+          match={{
+            id: fixture.id,
+            home: home.name,
+            away: away.name,
+            kickoff: fixture.kickoff,
+            kickoffLabel: fixture.kickoffLabel,
+            league: league.nameTh,
+          }}
+        />
+        </div>
 
         <ProviderBanner provider={provider} fallback={fallback} error={error} />
 

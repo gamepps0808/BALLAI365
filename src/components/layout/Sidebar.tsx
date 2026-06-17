@@ -19,6 +19,7 @@ import {
   Bell,
   Settings,
   Crown,
+  Star,
 } from "lucide-react";
 import { ScoreRing } from "../ui/ScoreRing";
 
@@ -35,6 +36,7 @@ const menu = [
   { href: "/results", label: "ผลบอลย้อนหลัง", icon: History },
   { href: "/live", label: "แมตช์สด", icon: Radio },
   { href: "/ai-picks", label: "AI แนะนำ", icon: Sparkles },
+  { href: "/favorites", label: "รายการโปรด", icon: Star },
   { href: "/leagues", label: "วิเคราะห์ลีก", icon: BarChart3 },
   { href: "/handicap", label: "แฮนดิแคป", icon: Scale },
   { href: "/over-under", label: "สูง / ต่ำ", icon: ArrowUpDown },
