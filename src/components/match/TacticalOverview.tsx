@@ -67,20 +67,40 @@ export function TacticalOverview({ fixture }: { fixture: Fixture }) {
           <rect x="4" y="86" width="16" height="48" fill="none" stroke="rgba(180,220,190,0.3)" />
           <rect x="400" y="86" width="16" height="48" fill="none" stroke="rgba(180,220,190,0.3)" />
 
-          {/* ผู้เล่น */}
+          {/* ผู้เล่น — วงกลม + เบอร์เสื้อ (เรียงตามลำดับ formation จาก API) */}
           {homeRows ? (
-            dots(homeRows, false).map((d, i) => (
-              <circle key={`h${i}`} cx={d.x} cy={d.y} r="7" fill="var(--neon-blue)" stroke="rgba(255,255,255,0.55)" />
-            ))
+            dots(homeRows, false).map((d, i) => {
+              const num = fixture.homeLineup?.startXIDetail?.[i]?.number;
+              return (
+                <g key={`h${i}`}>
+                  <circle cx={d.x} cy={d.y} r="9" fill="var(--neon-blue)" stroke="rgba(255,255,255,0.65)" strokeWidth="1.2" />
+                  {num != null && (
+                    <text x={d.x} y={d.y} textAnchor="middle" dominantBaseline="central" fontSize="8.5" fontWeight="800" fill="#fff">
+                      {num}
+                    </text>
+                  )}
+                </g>
+              );
+            })
           ) : (
             <text x="105" y="114" textAnchor="middle" fontSize="11" fill="rgba(200,210,230,0.6)">
               ยังไม่ประกาศ
             </text>
           )}
           {awayRows ? (
-            dots(awayRows, true).map((d, i) => (
-              <circle key={`a${i}`} cx={d.x} cy={d.y} r="7" fill="var(--danger)" stroke="rgba(255,255,255,0.55)" />
-            ))
+            dots(awayRows, true).map((d, i) => {
+              const num = fixture.awayLineup?.startXIDetail?.[i]?.number;
+              return (
+                <g key={`a${i}`}>
+                  <circle cx={d.x} cy={d.y} r="9" fill="var(--danger)" stroke="rgba(255,255,255,0.65)" strokeWidth="1.2" />
+                  {num != null && (
+                    <text x={d.x} y={d.y} textAnchor="middle" dominantBaseline="central" fontSize="8.5" fontWeight="800" fill="#fff">
+                      {num}
+                    </text>
+                  )}
+                </g>
+              );
+            })
           ) : (
             <text x="315" y="114" textAnchor="middle" fontSize="11" fill="rgba(200,210,230,0.6)">
               ยังไม่ประกาศ
