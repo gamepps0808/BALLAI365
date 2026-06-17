@@ -13,6 +13,7 @@ import {
   CornerAnalysis,
   AfFixtureRaw,
   AfTeamStatistics,
+  AfOddsBookmaker,
 } from "@/types/football";
 import * as api from "../api-football";
 import * as map from "../football-mapper";
@@ -144,6 +145,20 @@ export class ApiFootballProvider implements FootballDataProvider {
     const bigIds = new Set(selection?.fixtureIds ?? []);
     const detailLimit = getSettings().detailLimit;
 
+    // ราคา bulk ทั้งวัน (Bet365) — เติมราคาแฮนดิแคป/1X2 ให้ทุกคู่รวมถึงคู่ที่ไม่ enrich
+    // โดยไม่เปลือง call รายคู่ (1-2 call ต่อวัน cache 30 นาที)
+    // UTC: คู่เตะ 00:00-07:00 ไทยอยู่ในวันก่อนตาม UTC จึงดึง 2 วันรวมกัน
+    const prevDay = new Intl.DateTimeFormat("en-CA", { timeZone: "UTC" }).format(
+      new Date(new Date(`${day}T00:00:00+07:00`).getTime() - 12 * 3600 * 1000)
+    );
+    const [oddsToday, oddsPrev] = await Promise.all([
+      api.getOddsForDate(day).catch(() => []),
+      api.getOddsForDate(prevDay).catch(() => []),
+    ]);
+    const bulkOdds = new Map<number, AfOddsBookmaker[]>(
+      [...oddsPrev, ...oddsToday].map((o) => [o.fixture.id, o.bookmakers ?? []])
+    );
+
     const fixtures: Fixture[] = [];
     for (const [i, raw] of supported.entries()) {
       try {
@@ -151,7 +166,9 @@ export class ApiFootballProvider implements FootballDataProvider {
         const enrich = bigIds.size > 0
           ? bigIds.has(afId) || loadSavedAnalysis(`af-${afId}`) !== null
           : i < detailLimit;
-        fixtures.push(await this.assemble(raw, { detail: false, enrich }));
+        fixtures.push(
+          await this.assemble(raw, { detail: false, enrich, bulkBookmakers: bulkOdds.get(afId) })
+        );
       } catch (err) {
         // one malformed fixture must not sink the whole day
         console.error(`[api-football] skip fixture ${raw.fixture.id}:`, (err as Error).message);
@@ -240,7 +257,7 @@ export class ApiFootballProvider implements FootballDataProvider {
 
   private async assemble(
     raw: AfFixtureRaw,
-    opts: { detail: boolean; enrich: boolean }
+    opts: { detail: boolean; enrich: boolean; bulkBookmakers?: AfOddsBookmaker[] }
   ): Promise<Fixture> {
     const status: EndpointStatus[] = [
       { endpoint: "fixtures", ok: true, state: "ok" },
@@ -347,7 +364,8 @@ export class ApiFootballProvider implements FootballDataProvider {
     const awayGoalsReal = fillGoalsFromRecent(away, awayRecent) || away.statsAvg.goalsFor !== 1.4;
 
     /* ---------- odds markets ---------- */
-    const bookmakers = oddsRows?.[0]?.bookmakers ?? [];
+    // ราคารายคู่ (enrich) ก่อน — ถ้าไม่มีใช้ราคา bulk ทั้งวัน (คู่ที่ไม่ enrich ก็มีราคา)
+    const bookmakers = oddsRows?.[0]?.bookmakers ?? opts.bulkBookmakers ?? [];
     const matchWinner = calc.extractMatchWinner(bookmakers);
     const ouMarket = calc.extractOverUnder(bookmakers);
     const ahMarket = calc.extractAsianHandicap(bookmakers);
