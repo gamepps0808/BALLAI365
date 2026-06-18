@@ -192,7 +192,7 @@ export function MatchOfTheDay({ fixture }: { fixture: Fixture }) {
       {/* Stat strip */}
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
         {[
-          { label: "EXPECTED SCORE", value: `${p.expectedScore.home} - ${p.expectedScore.away}`, sub: "สกอร์ที่คาด" },
+          { label: "EXPECTED SCORE", value: `${p.expectedScore.home} - ${p.expectedScore.away}`, sub: "AI ทาย · อัปเดตล่าสุดก่อนเตะ" },
           p.handicapPickTeam !== null
             ? { label: "HANDICAP PICK", value: p.handicapPickTeam, sub: `แต้มต่อ ${p.handicapLine}`, accent: "var(--soft-purple)" }
             : { label: "HANDICAP PICK", value: "ไม่มีข้อมูลแฮนดิแคป", sub: "Missing Data", accent: "var(--text-muted)" },

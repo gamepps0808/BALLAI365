@@ -28,7 +28,7 @@ export default async function BacktestPage() {
       <div className="space-y-4 p-4 lg:p-6">
         <p className="flex items-center gap-2 text-[12px] text-[var(--text-secondary)]">
           <History size={15} className="text-[var(--neon-blue)]" />
-          สถิติจริงทั้งหมด — คำทายของ AI ถูกล็อกไว้ตอนวิเคราะห์ แล้วตัดสินกับสกอร์จริงหลังจบแมตช์
+          สถิติจริงทั้งหมด — คำทายของ AI (รอบสุดท้ายก่อนเตะ ด้วยรายชื่อตัวจริง) ถูกล็อก แล้วตัดสินกับสกอร์จริงหลังจบแมตช์
           {acc.pending > 0 && (
             <span className="tabular text-[11px] text-[var(--text-muted)]">
               (รอตัดสินอีก {acc.pending} คู่)
@@ -97,6 +97,7 @@ export default async function BacktestPage() {
         <p className="text-[11px] text-[var(--text-muted)]">
           * ✓ = ทายถูก, ✗ = ทายผิด (เส้นเศษ .25/.75 ได้ครึ่งนับถูก เสียครึ่งนับผิด) ·
           — = ไม่มีคำทาย หรือผลออกเท่าเส้นพอดี (push) · คู่ที่ยกเลิก/เลื่อนแข่งไม่ถูกนับ ·
+          สกอร์ทาย = คำทายรอบสุดท้ายก่อนเตะ (วิเคราะห์ใหม่ด้วยตัวจริง) อาจต่างจากทรรศนะช่วงแรก ·
           สถิติในอดีตไม่การันตีผลในอนาคต
         </p>
         <Disclaimer />
