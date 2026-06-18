@@ -101,8 +101,9 @@ export async function analyzeFixtureWithClaude(
   const cacheKey = `claude:analysis:${fixture.id}${opts?.force ? ":final" : ""}`;
   return cached(cacheKey, opts?.force ? 1800 : 6 * 3600, async () => {
     // วิเคราะห์แล้วเซฟถาวร — รีเฟรช/รีสตาร์ทกี่ครั้งก็ไม่หาย และไม่เรียก API ซ้ำ
-    // force = รอบสุดท้ายก่อนเตะ: ข้ามของเดิม วิเคราะห์ใหม่ด้วยข้อมูลล่าสุด (ตัวจริง/ราคา)
-    const saved = opts?.force ? null : loadSavedAnalysis<ClaudeAnalysis>(fixture.id);
+    // ล็อกคำทายแรก: วิเคราะห์ครั้งเดียวต่อคู่ — แม้รอบ prekick (force) ก็ "ไม่ทับ" ของเดิม
+    // → สกอร์ที่โชว์ตอนแรกบนหน้าหลัก = สกอร์ที่บันทึกย้อนหลัง เป๊ะเสมอ + ประหยัด API
+    const saved = loadSavedAnalysis<ClaudeAnalysis>(fixture.id);
     if (saved) return saved;
 
     try {
