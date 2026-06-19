@@ -1,6 +1,7 @@
 import { Topbar } from "@/components/layout/Topbar";
 import { OverviewCards } from "@/components/dashboard/OverviewCards";
 import { QuickNav } from "@/components/dashboard/QuickNav";
+import { StatsStrip } from "@/components/dashboard/StatsStrip";
 import { DashboardMatches } from "@/components/dashboard/DashboardMatches";
 import { Disclaimer } from "@/components/ui/Disclaimer";
 import { AutoRefresh } from "@/components/ui/AutoRefresh";
@@ -104,7 +105,10 @@ export default async function DashboardPage() {
             )}
           </div>
         )}
-        <OverviewCards stats={overview} />
+        {/* การ์ดสถิติเต็ม — เฉพาะคอม (มือถือใช้แถบย่อล่างสุดแทน) */}
+        <div className="hidden lg:block">
+          <OverviewCards stats={overview} />
+        </div>
 
         {motd ? (
           <DashboardMatches key={motd.id} fixtures={fixtures} newDayLabel={newDayLabel} />
@@ -114,6 +118,8 @@ export default async function DashboardPage() {
           </div>
         )}
 
+        {/* มือถือ: แถบสถิติย่อล่างสุด (trust signal) */}
+        <StatsStrip stats={overview} />
         <Disclaimer />
       </div>
     </main>

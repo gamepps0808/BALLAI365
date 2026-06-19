@@ -198,8 +198,8 @@ export function MatchOfTheDay({ fixture }: { fixture: Fixture }) {
         </div>
       </div>
 
-      {/* Stat strip */}
-      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+      {/* Stat strip — ซ่อนบนมือถือ (ดูครบในหน้าวิเคราะห์เต็ม) โชว์เฉพาะคอม */}
+      <div className="mt-3 hidden gap-3 lg:grid lg:grid-cols-3 xl:grid-cols-6">
         {[
           { label: "EXPECTED SCORE", value: `${p.expectedScore.home} - ${p.expectedScore.away}`, sub: "AI ทาย · อัปเดตล่าสุดก่อนเตะ" },
           p.handicapPickTeam !== null
@@ -230,8 +230,8 @@ export function MatchOfTheDay({ fixture }: { fixture: Fixture }) {
         ))}
       </div>
 
-      {/* AI Reason + Key Players */}
-      <div className="mt-3 grid gap-3 lg:grid-cols-[1.1fr_1fr]">
+      {/* AI Reason + Key Players — ซ่อนบนมือถือ (อยู่ในหน้าวิเคราะห์เต็ม) โชว์เฉพาะคอม */}
+      <div className="mt-3 hidden gap-3 lg:grid lg:grid-cols-[1.1fr_1fr]">
         <div className="glass p-4">
           <p className="text-[11px] font-bold tracking-wider text-[var(--neon-green)]">
             AI REASON <span className="font-normal text-[var(--text-muted)]">(เหตุผลที่เลือก)</span>
@@ -289,13 +289,14 @@ export function MatchOfTheDay({ fixture }: { fixture: Fixture }) {
         </div>
       </div>
 
-      <div className="mt-3 flex items-center justify-between gap-3">
-        <p className="text-[10px] text-[var(--text-muted)]">{p.warning}</p>
+      {/* มือถือ: ปุ่ม "ดูวิเคราะห์เต็ม" เต็มแถวเป็น CTA ชัด ๆ (คอม: วางขวาเหมือนเดิม) */}
+      <div className="mt-3 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+        <p className="order-2 text-[10px] text-[var(--text-muted)] lg:order-1">{p.warning}</p>
         <Link
           href={`/match/${fixture.id}`}
-          className="shrink-0 rounded-lg bg-[var(--neon-green)] px-4 py-2 text-[12px] font-bold text-black transition-opacity hover:opacity-90"
+          className="order-1 rounded-lg bg-[var(--neon-green)] px-4 py-2.5 text-center text-[12px] font-bold text-black transition-opacity hover:opacity-90 lg:order-2 lg:shrink-0 lg:py-2"
         >
-          ดูการวิเคราะห์เต็ม
+          ดูวิเคราะห์เต็ม (สกอร์ · แฮนดิแคป · สูง/ต่ำ · เหตุผล) →
         </Link>
       </div>
     </section>
