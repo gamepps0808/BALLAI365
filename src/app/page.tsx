@@ -1,5 +1,6 @@
 import { Topbar } from "@/components/layout/Topbar";
 import { OverviewCards } from "@/components/dashboard/OverviewCards";
+import { QuickNav } from "@/components/dashboard/QuickNav";
 import { DashboardMatches } from "@/components/dashboard/DashboardMatches";
 import { Disclaimer } from "@/components/ui/Disclaimer";
 import { AutoRefresh } from "@/components/ui/AutoRefresh";
@@ -62,6 +63,8 @@ export default async function DashboardPage() {
       {hasLive && <AutoRefresh seconds={60} />}
       <Topbar title="ภาพรวมวันนี้" />
       <div className="space-y-4 p-4 lg:p-6">
+        {/* มือถือ: ทางลัดฟีเจอร์หลักบนสุด ให้เห็นทันทีว่าแอพทำอะไรได้ (คอมใช้ sidebar) */}
+        <QuickNav />
         <ProviderBanner provider={provider} fallback={fallback} error={error} />
         {(liveCount > 0 || todayLeftCount > 0 || finishedCount > 0) && (
           <div className="flex flex-col gap-2 sm:flex-row">
