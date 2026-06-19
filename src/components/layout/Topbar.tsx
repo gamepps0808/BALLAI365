@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import Link from "next/link";
 import { Globe, ChevronRight } from "lucide-react";
 import { Freshness } from "../ui/Freshness";
 import { SearchBox } from "./SearchBox";
@@ -17,6 +19,17 @@ export function Topbar({ title }: { title: string }) {
 
   return (
     <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-[var(--border-subtle)] bg-[var(--bg-deep)]/70 px-4 py-3 backdrop-blur-xl lg:px-6">
+      {/* โลโก้ — โชว์เฉพาะมือถือ (คอมมีโลโก้ใน sidebar อยู่แล้ว) */}
+      <Link href="/" className="shrink-0 lg:hidden" aria-label="BALLAI365 หน้าหลัก">
+        <Image
+          src="/logo.png"
+          alt="BALLAI365"
+          width={720}
+          height={210}
+          priority
+          className="h-7 w-auto"
+        />
+      </Link>
       <div className="min-w-0">
         <h1 className="truncate text-lg font-bold">{title}</h1>
         <div className="flex items-center gap-3 text-[11px] text-[var(--text-muted)]">

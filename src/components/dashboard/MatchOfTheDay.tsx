@@ -198,6 +198,30 @@ export function MatchOfTheDay({ fixture }: { fixture: Fixture }) {
         </div>
       </div>
 
+      {/* มือถือ: คำทายหลัก 3 อัน แถวเดียวกระชับ (สกอร์ · แฮนดิแคป · สูง/ต่ำ) */}
+      <div className="mt-3 grid grid-cols-3 gap-2 lg:hidden">
+        <div className="glass p-2.5 text-center">
+          <p className="text-[9px] font-semibold tracking-wider text-[var(--text-muted)]">สกอร์ทาย</p>
+          <p className="tabular mt-1 text-[15px] font-bold leading-none">
+            {p.expectedScore.home}-{p.expectedScore.away}
+          </p>
+        </div>
+        <div className="glass p-2.5 text-center">
+          <p className="text-[9px] font-semibold tracking-wider text-[var(--text-muted)]">แฮนดิแคป</p>
+          <p className="mt-1 text-[11px] font-bold leading-tight text-[var(--soft-purple)]">
+            {p.handicapPickTeam ?? "—"}
+          </p>
+        </div>
+        <div className="glass p-2.5 text-center">
+          <p className="text-[9px] font-semibold tracking-wider text-[var(--text-muted)]">สูง / ต่ำ</p>
+          <p className="mt-1 text-[11px] font-bold leading-tight text-[var(--soft-purple)]">
+            {p.overUnderPick != null && p.overUnderLine != null
+              ? `${p.overUnderPick === "OVER" ? "สูง" : "ต่ำ"} ${p.overUnderLine}`
+              : "—"}
+          </p>
+        </div>
+      </div>
+
       {/* Stat strip — ซ่อนบนมือถือ (ดูครบในหน้าวิเคราะห์เต็ม) โชว์เฉพาะคอม */}
       <div className="mt-3 hidden gap-3 lg:grid lg:grid-cols-3 xl:grid-cols-6">
         {[
