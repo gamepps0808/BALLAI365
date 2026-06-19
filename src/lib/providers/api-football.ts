@@ -412,7 +412,6 @@ export class ApiFootballProvider implements FootballDataProvider {
     const pickTeam = pick === "HOME" ? home : pick === "AWAY" ? away : null;
     const pickProb = pick === "HOME" ? ph : pick === "AWAY" ? pa : pd;
     const expectedScore = poi.likelyScoreByOutcome[pick];
-    const expectedMargin = expectedScore.home - expectedScore.away;
 
     /* ---------- AI Score (per-spec weights, only real data) ---------- */
     const picked = pick === "AWAY" ? away : home;
@@ -488,9 +487,12 @@ export class ApiFootballProvider implements FootballDataProvider {
     //   ทายชนะมากกว่าเส้น → ตัวเต็งต่อ · น้อยกว่าเส้น → ทีมรองรับลูก (value bet)
     const handicapLine = ahMarket ? ahMarket.line : null;
     const handicapPickTeam = ahMarket && handicapLine !== null
-      ? expectedMargin + handicapLine > 0
-        ? `${home.shortName} ${fmtLine(handicapLine)}`
-        : `${away.shortName} ${fmtLine(-handicapLine)}`
+      ? handicapLabel(
+          handicapPickSide(expectedScore.home, expectedScore.away, handicapLine),
+          home.shortName,
+          away.shortName,
+          handicapLine
+        )
       : null;
 
     const fxStats = fixtureStatRows ? map.mapFixtureStats(fixtureStatRows, homeId) : null;

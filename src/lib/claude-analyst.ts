@@ -3,7 +3,7 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
 import { cached } from "./cache";
 import { loadSavedAnalysis, saveAnalysis } from "./claude-store";
-import { buildSelfReview } from "./accuracy";
+import { buildSelfReview, handicapPickSide, handicapLabel } from "./accuracy";
 import { computeValue } from "./football-calculator";
 import { researchExternalViews, loadResearch } from "./claude-research";
 import { Fixture, PickSide, ExternalResearch } from "./types";
@@ -332,13 +332,10 @@ export function applyClaudeAnalysis(fixture: Fixture, a: ClaudeAnalysis): void {
   };
 
   /* ---- ฝั่งแฮนดิแคป/สูงต่ำ ปรับตามสกอร์ใหม่ (เส้นตลาดเดิม) ---- */
-  const margin = a.expectedScore.home - a.expectedScore.away;
   if (p.handicapLine !== null) {
-    const fmt = (n: number) => (n > 0 ? `+${n}` : `${n}`);
-    p.handicapPickTeam =
-      margin + p.handicapLine > 0
-        ? `${fixture.homeTeam.shortName} ${fmt(p.handicapLine)}`
-        : `${fixture.awayTeam.shortName} ${fmt(-p.handicapLine)}`;
+    // ใช้ helper ร่วม — รองรับ "เสมอราคา (คืนทุน)" เมื่อทายชนะเท่าเส้นพอดี
+    const side = handicapPickSide(a.expectedScore.home, a.expectedScore.away, p.handicapLine);
+    p.handicapPickTeam = handicapLabel(side, fixture.homeTeam.shortName, fixture.awayTeam.shortName, p.handicapLine);
   }
   if (p.overUnderLine !== null) {
     if (a.overUnderPick) {

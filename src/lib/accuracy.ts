@@ -30,7 +30,7 @@ export interface LedgerEntry {
   expHome: number;
   expAway: number;
   ahLine: number | null; // มุมมองเจ้าบ้าน (ลบ = ต่อ)
-  ahSide: "HOME" | "AWAY" | null;
+  ahSide: "HOME" | "AWAY" | "PUSH" | null;
   ahLabel: string | null;
   ouLine: number | null;
   ouPick: "OVER" | "UNDER" | null;
@@ -104,17 +104,22 @@ export function handicapPickSide(
   expHome: number,
   expAway: number,
   ahLine: number
-): "HOME" | "AWAY" {
-  return expHome - expAway + ahLine > 0 ? "HOME" : "AWAY";
+): "HOME" | "AWAY" | "PUSH" {
+  // สกอร์ที่ทายเทียบเส้น: >0 เจ้าบ้านกินราคา · <0 ทีมเยือนกินราคา
+  // =0 (เกิดได้เฉพาะเส้นเต็มลูก เช่น -1 แล้วทายชนะ 1 ลูกพอดี) = เสมอราคา/คืนทุน ไม่มีฝั่งได้เปรียบ
+  const v = expHome - expAway + ahLine;
+  if (v === 0) return "PUSH";
+  return v > 0 ? "HOME" : "AWAY";
 }
 
 /** ป้ายแฮนดิแคปสำหรับแสดง จากฝั่ง+เส้น (เส้นมุมเจ้าบ้าน) */
 export function handicapLabel(
-  side: "HOME" | "AWAY",
+  side: "HOME" | "AWAY" | "PUSH",
   homeShort: string,
   awayShort: string,
   ahLine: number
 ): string {
+  if (side === "PUSH") return "เสมอราคา (คืนทุน)";
   const fmt = (n: number) => (n > 0 ? `+${n}` : `${n}`);
   return side === "HOME"
     ? `${homeShort} ${fmt(ahLine)}`
@@ -144,7 +149,7 @@ function derivedHandicap(
   expHome: number,
   expAway: number,
   ahLine: number | null
-): { side: "HOME" | "AWAY"; label: string } | null {
+): { side: "HOME" | "AWAY" | "PUSH"; label: string } | null {
   if (ahLine == null || !f.homeTeam || !f.awayTeam) return null;
   const side = handicapPickSide(expHome, expAway, ahLine);
   return {
@@ -361,9 +366,13 @@ export function settlePending(): Promise<number> {
         if (e.ahLine != null) {
           // ฝั่งที่แทง derive จากสกอร์ที่ทาย+เส้น (กัน ahSide เก่าที่อาจ stale)
           const side = handicapPickSide(e.expHome, e.expAway, e.ahLine);
-          const homeAdj = h - a + e.ahLine; // ahLine มุมมองเจ้าบ้าน
-          const margin = side === "HOME" ? homeAdj : -homeAdj;
-          e.rAh = margin === 0 ? null : margin > 0;
+          if (side === "PUSH") {
+            e.rAh = null; // สกอร์ที่ทายเท่าเส้นพอดี = เสมอราคา ไม่มีฝั่งให้ตัดสิน
+          } else {
+            const homeAdj = h - a + e.ahLine; // ahLine มุมมองเจ้าบ้าน
+            const margin = side === "HOME" ? homeAdj : -homeAdj;
+            e.rAh = margin === 0 ? null : margin > 0;
+          }
         } else e.rAh = null;
 
         // สูงต่ำ — ตัดสินตามทิศทางเช่นกัน เช่น เส้น 2.25 ยิง 2 ลูก:
