@@ -195,7 +195,8 @@ export async function fetchLiteFixtures(
             leagueRank(f.league.name, f.league.country) < 99)
       )
       .map((f) => {
-        const bookmakers = oddsByFixture.get(f.fixture.id)!;
+        // คู่ลีกใหญ่ที่ราคายังไม่เปิด (includeScheduled) ไม่มีใน oddsByFixture → ใช้ [] กัน .find แตก
+        const bookmakers = oddsByFixture.get(f.fixture.id) ?? [];
         const mw = extractMatchWinner(bookmakers);
         const ah = extractAsianHandicap(bookmakers);
         return {
