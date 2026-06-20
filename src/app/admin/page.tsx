@@ -10,6 +10,7 @@ import {
   Database,
   Save,
   Loader2,
+  Sparkles,
 } from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
 import { Disclaimer } from "@/components/ui/Disclaimer";
@@ -54,7 +55,7 @@ export default function AdminPage() {
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [system, setSystem] = useState<SystemInfo | null>(null);
   const [saving, setSaving] = useState(false);
-  const [busy, setBusy] = useState<"refresh" | "cache" | null>(null);
+  const [busy, setBusy] = useState<"refresh" | "cache" | "reanalyze" | null>(null);
   const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
   // null = กำลังเช็คสิทธิ์, false = ต้องใส่รหัส, true = เข้าได้
   const [authed, setAuthed] = useState<boolean | null>(null);
@@ -141,6 +142,28 @@ export default function AdminPage() {
       setSystem(sys.data);
     } catch (err) {
       setNote({ ok: false, text: `รีเฟรชล้มเหลว: ${(err as Error).message}` });
+    }
+    setBusy(null);
+  }
+
+  async function reanalyze() {
+    setBusy("reanalyze");
+    setNote(null);
+    try {
+      const res = await fetch("/api/admin/reanalyze", { method: "POST" });
+      const json = await res.json();
+      if (res.ok) {
+        setNote({
+          ok: true,
+          text: `วิเคราะห์ใหม่สำเร็จ — ลบผลเก่า ${json.data.cleared} คู่ (ยังไม่เตะ) แล้ววิเคราะห์ใหม่ด้วย logic ล่าสุด (Claude ตัดสินแฮนดิแคปเอง)`,
+        });
+        const sys = await fetch("/api/admin/system").then((r) => r.json());
+        setSystem(sys.data);
+      } else {
+        setNote({ ok: false, text: json.error ?? "วิเคราะห์ใหม่ไม่สำเร็จ" });
+      }
+    } catch (err) {
+      setNote({ ok: false, text: `วิเคราะห์ใหม่ล้มเหลว: ${(err as Error).message}` });
     }
     setBusy(null);
   }
@@ -456,6 +479,18 @@ export default function AdminPage() {
                 <RefreshCw size={13} />
               )}
               Force Refresh Data
+            </button>
+            <button
+              onClick={reanalyze}
+              disabled={busy !== null}
+              className="flex items-center justify-center gap-1.5 rounded-lg bg-[var(--soft-purple)] px-5 py-2 text-[12px] font-semibold text-white hover:opacity-90 disabled:opacity-40"
+            >
+              {busy === "reanalyze" ? (
+                <Loader2 size={13} className="animate-spin" />
+              ) : (
+                <Sparkles size={13} />
+              )}
+              วิเคราะห์ใหม่ (ยังไม่เตะ)
             </button>
             <button
               onClick={clearCache}

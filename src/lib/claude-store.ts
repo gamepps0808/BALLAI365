@@ -35,6 +35,20 @@ export function saveAnalysis(fixtureId: string, analysis: unknown): void {
   }
 }
 
+/** ลบผลวิเคราะห์ที่เซฟไว้ของคู่นั้น — ให้รอบถัดไปวิเคราะห์ใหม่สด (ใช้ตอนอัปเดต logic) */
+export function deleteAnalysis(fixtureId: string): boolean {
+  try {
+    const file = fileFor(fixtureId);
+    if (fs.existsSync(file)) {
+      fs.unlinkSync(file);
+      return true;
+    }
+  } catch {
+    // best-effort
+  }
+  return false;
+}
+
 function pruneOld(): void {
   try {
     const now = Date.now();
