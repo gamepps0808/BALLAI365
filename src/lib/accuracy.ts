@@ -143,19 +143,42 @@ export function effectiveOuPick(
   return scoreSide && stored !== scoreSide ? scoreSide : stored;
 }
 
-/** ฝั่ง+ป้าย ในครั้งเดียว — คืน null ถ้าไม่มีเส้นหรือไม่มีทีม */
+/**
+ * ฝั่ง+ป้ายแฮนดิแคป — ยึด "คำตัดสินของ Claude" (verdict) ก่อนเสมอ (ดุลพินิจอิสระ อิงโอกาสกินเส้น)
+ * ถ้า Claude ไม่ได้ตัดสิน (null) ค่อย derive จากสกอร์ที่ทายเป็น fallback
+ *   HOME/AWAY = ฝั่งที่กินราคา · PASS = ก้ำกึ่ง/เสมอราคา (ไม่ตัดสิน side=null)
+ */
+export function resolveHandicap(
+  verdict: "HOME" | "AWAY" | "PASS" | null | undefined,
+  homeShort: string,
+  awayShort: string,
+  ahLine: number,
+  expHome: number,
+  expAway: number
+): { side: "HOME" | "AWAY" | "PUSH" | null; label: string } {
+  if (verdict === "PASS") return { side: null, label: "ก้ำกึ่ง (ผ่าน)" };
+  if (verdict === "HOME" || verdict === "AWAY")
+    return { side: verdict, label: handicapLabel(verdict, homeShort, awayShort, ahLine) };
+  const side = handicapPickSide(expHome, expAway, ahLine);
+  return { side, label: handicapLabel(side, homeShort, awayShort, ahLine) };
+}
+
+/** ฝั่ง+ป้าย ในครั้งเดียว — คืน null ถ้าไม่มีเส้นหรือไม่มีทีม (ใช้ verdict จาก f.prediction) */
 function derivedHandicap(
   f: Fixture,
   expHome: number,
   expAway: number,
   ahLine: number | null
-): { side: "HOME" | "AWAY" | "PUSH"; label: string } | null {
+): { side: "HOME" | "AWAY" | "PUSH" | null; label: string } | null {
   if (ahLine == null || !f.homeTeam || !f.awayTeam) return null;
-  const side = handicapPickSide(expHome, expAway, ahLine);
-  return {
-    side,
-    label: handicapLabel(side, f.homeTeam.shortName, f.awayTeam.shortName, ahLine),
-  };
+  return resolveHandicap(
+    f.prediction?.handicapVerdict,
+    f.homeTeam.shortName,
+    f.awayTeam.shortName,
+    ahLine,
+    expHome,
+    expAway
+  );
 }
 
 /* --------------------------- record (ตอนวิเคราะห์) --------------------------- */
@@ -363,16 +386,12 @@ export function settlePending(): Promise<number> {
 
         // แฮนดิแคป — ตัดสินตามทิศทาง: ได้ครึ่งนับถูก เสียครึ่งนับผิด
         // เหลือ null เฉพาะ push เส้นเต็มพอดี (ไม่มีทิศทางให้ตัดสิน)
-        if (e.ahLine != null) {
-          // ฝั่งที่แทง derive จากสกอร์ที่ทาย+เส้น (กัน ahSide เก่าที่อาจ stale)
-          const side = handicapPickSide(e.expHome, e.expAway, e.ahLine);
-          if (side === "PUSH") {
-            e.rAh = null; // สกอร์ที่ทายเท่าเส้นพอดี = เสมอราคา ไม่มีฝั่งให้ตัดสิน
-          } else {
-            const homeAdj = h - a + e.ahLine; // ahLine มุมมองเจ้าบ้าน
-            const margin = side === "HOME" ? homeAdj : -homeAdj;
-            e.rAh = margin === 0 ? null : margin > 0;
-          }
+        // ตัดสินจาก "ฝั่งที่ล็อกไว้" (e.ahSide = คำตัดสิน Claude หรือ derive จากสกอร์)
+        // PUSH/PASS/ไม่มีฝั่ง (null) = ไม่ตัดสิน (—)
+        if (e.ahLine != null && (e.ahSide === "HOME" || e.ahSide === "AWAY")) {
+          const homeAdj = h - a + e.ahLine; // ahLine มุมมองเจ้าบ้าน
+          const margin = e.ahSide === "HOME" ? homeAdj : -homeAdj;
+          e.rAh = margin === 0 ? null : margin > 0;
         } else e.rAh = null;
 
         // สูงต่ำ — ตัดสินตามทิศทางเช่นกัน เช่น เส้น 2.25 ยิง 2 ลูก:

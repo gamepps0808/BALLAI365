@@ -118,12 +118,15 @@ export function MatchOfTheDay({ fixture }: { fixture: Fixture }) {
             // ทายผลชนะ (1X2) กับคำแนะนำราคาต่อรอง อาจคนละทีม —
             // ตัวเต็งชนะแต่ "ชนะไม่ขาด" จึงไม่ผ่านราคาต่อรอง → แนะนำรับลูกทีมรอง
             const pickTeam = p.pick === "HOME" ? home : p.pick === "AWAY" ? away : null;
-            // ทายชนะเท่าเส้นพอดี = เสมอราคา (คืนทุน) — เตือนว่าไม่มีฝั่งได้เปรียบ
-            if (pickTeam && p.handicapPickTeam?.includes("เสมอราคา")) {
+            // ราคาต่อรองก้ำกึ่ง/เสมอราคา (AI ตัดสิน PASS หรือทายชนะเท่าเส้นพอดี) — ไม่มีฝั่งได้เปรียบ
+            if (
+              pickTeam &&
+              (p.handicapPickTeam?.includes("เสมอราคา") || p.handicapPickTeam?.includes("ก้ำกึ่ง"))
+            ) {
               return (
                 <p className="mt-2 rounded-lg bg-[var(--warning-soft)] px-2.5 py-1.5 text-[11px] leading-relaxed text-[var(--warning)]">
-                  ⚠️ {pickTeam.shortName} ชนะตามที่ทาย แต่ <b>ชนะเท่าเส้นพอดี</b> →
-                  แฮนดิแคปเป็น <b>เสมอราคา (คืนทุน)</b> ไม่มีฝั่งได้เปรียบบนเส้นนี้
+                  ⚠️ {pickTeam.shortName} ชนะตามที่ทาย แต่ราคาต่อรองเป็น{" "}
+                  <b>{p.handicapPickTeam}</b> — ไม่มีฝั่งได้เปรียบชัดบนเส้นนี้
                 </p>
               );
             }

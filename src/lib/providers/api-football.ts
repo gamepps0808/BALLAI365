@@ -20,7 +20,7 @@ import * as map from "../football-mapper";
 import * as calc from "../football-calculator";
 import { deriveStatus } from "../engine/score";
 import { analyzeFixtureWithClaude, applyClaudeAnalysis, claudeEnabled } from "../claude-analyst";
-import { recordPrediction, getLedgerEntry, LedgerEntry, handicapPickSide, handicapLabel, effectiveOuPick } from "../accuracy";
+import { recordPrediction, getLedgerEntry, LedgerEntry, handicapPickSide, handicapLabel, resolveHandicap, effectiveOuPick } from "../accuracy";
 import { getSettings } from "../settings";
 import { cacheGet, cachePut } from "../cache";
 import { getMatchWeather } from "../openweather";
@@ -58,8 +58,15 @@ function applyLockedMarkets(f: Fixture, locked: LedgerEntry): void {
   // ล็อกเฉพาะ "เส้นราคา" จากตลาด — ส่วนฝั่งที่แทง derive จากสกอร์ Claude ปัจจุบัน
   if (locked.ahLine != null && f.homeTeam && f.awayTeam) {
     p.handicapLine = locked.ahLine;
-    const side = handicapPickSide(p.expectedScore.home, p.expectedScore.away, locked.ahLine);
-    p.handicapPickTeam = handicapLabel(side, f.homeTeam.shortName, f.awayTeam.shortName, locked.ahLine);
+    // ยึดคำตัดสิน Claude (p.handicapVerdict ที่ applyClaudeAnalysis ตั้งไว้) ก่อน derive จากสกอร์
+    p.handicapPickTeam = resolveHandicap(
+      p.handicapVerdict,
+      f.homeTeam.shortName,
+      f.awayTeam.shortName,
+      locked.ahLine,
+      p.expectedScore.home,
+      p.expectedScore.away
+    ).label;
   }
   p.overUnderLine = locked.ouLine;
   // ฝั่งสูง/ต่ำ: ใช้เส้นที่ล็อก แต่ถ้าขัดกับสกอร์ที่ทายชัดเจน ให้อิงสกอร์ (helper เดียวกับ settle)

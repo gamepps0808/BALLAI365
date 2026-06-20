@@ -218,6 +218,8 @@ export interface Prediction {
   /** null = no Asian Handicap market from the API — UI must show "ไม่มีข้อมูลแฮนดิแคป" */
   handicapLine: number | null; // negative = home gives
   handicapPickTeam: string | null; // e.g. "Man City -0.25"
+  /** คำตัดสินแฮนดิแคปโดยตรงจาก Claude (อิสระจากสกอร์) — HOME/AWAY กินเส้น · PASS ก้ำกึ่ง · null=derive จากสกอร์ */
+  handicapVerdict?: "HOME" | "AWAY" | "PASS" | null;
   /** null = no Goals Over/Under market — UI must show "ไม่มีข้อมูลสูงต่ำ" */
   overUnderLine: number | null;
   overUnderPick: "OVER" | "UNDER" | null;

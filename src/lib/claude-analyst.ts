@@ -3,7 +3,7 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
 import { cached } from "./cache";
 import { loadSavedAnalysis, saveAnalysis } from "./claude-store";
-import { buildSelfReview, handicapPickSide, handicapLabel } from "./accuracy";
+import { buildSelfReview, resolveHandicap } from "./accuracy";
 import { computeValue } from "./football-calculator";
 import { researchExternalViews, loadResearch } from "./claude-research";
 import { Fixture, PickSide, ExternalResearch } from "./types";
@@ -36,6 +36,12 @@ const AnalysisSchema = z.object({
     .enum(["OVER", "UNDER"])
     .nullable()
     .describe("ต้องตอบ OVER หรือ UNDER เสมอเมื่อข้อมูลมี odds.overUnder — ตอบ null ได้เฉพาะกรณีไม่มีตลาดสูงต่ำเท่านั้น"),
+  handicapVerdict: z
+    .enum(["HOME", "AWAY", "PASS"])
+    .nullable()
+    .describe(
+      "คำตัดสินแฮนดิแคปโดยตรงที่เส้น odds.asianHandicapLine — ฝั่งที่ 'กินราคาต่อรอง' จริง: HOME=ทีมแรกกินเส้น, AWAY=ทีมที่สอง(รอง)กินเส้น, PASS=ก้ำกึ่ง/ใกล้เสมอราคา ไม่คุ้มเล่น. ใช้ดุลพินิจอิสระจากความน่าจะเป็นของ 'ส่วนต่างประตู' เทียบเส้น (ไม่ใช่แค่สกอร์ที่ทายเป๊ะ) — null เฉพาะเมื่อไม่มีตลาดแฮนดิแคป"
+    ),
   keyPlayers: z
     .object({
       home: z.object({ name: z.string(), positionTh: z.string() }).nullable(),
@@ -86,7 +92,12 @@ const SYSTEM_PROMPT = `คุณคือนักวิเคราะห์ฟ
 8. overUnderPick: ถ้าข้อมูลมี odds.overUnder ต้องเลือก OVER หรือ UNDER เสมอ (ห้าม null) โดยตัดสินจาก "แนวโน้มประตูรวมทั้งเกม" — ค่าเฉลี่ยประตูได้/เสียของสองทีม ราคาตลาด สภาพอากาศ ไม่ใช่แค่ผลรวมของสกอร์ที่ทาย
 9. fifaRanks: ทีมชาติให้ระบุอันดับโลก FIFA ล่าสุดที่คุณรู้ (ประมาณต้นปี 2026 ได้) — สโมสรหรือไม่มั่นใจให้ null
 10. handicapAssessmentTh / underdogAssessmentTh / drawAssessmentTh: เขียนแบบ "เซียนวิเคราะห์ราคา" มืออาชีพ ตอบให้ตรงคำถามที่นักเดิมพันอยากรู้ — บอลต่อ(ตัวเต็ง)ชนะกินราคาต่อรองได้ไหม, บอลรองรับลูกแล้วกินราคาได้ไหม/คุ้มกว่าไหม, ยันเสมอได้ไหม — อ้างเส้นจริง+สถิติ ไม่เชียร์ฝั่งใด ตอบ null เฉพาะเมื่อไม่มีประเด็นนั้นจริง
-11. ถ้ามี field "externalResearch" (ทรรศนะที่ค้นจากเว็บต่างประเทศ) ให้ใช้เป็น "ข้อมูลเสริม" ประกอบ โดยเฉพาะข่าวเจ็บ/แบนล่าสุดและมุมมองแท็กติก — แต่ห้ามให้ทรรศนะเว็บลบล้างข้อมูลตัวเลขจริง (ฟอร์ม/ราคา/สถิติ) ถ้าขัดกันให้ยึดตัวเลขจริงเป็นหลักและระบุไว้ในเหตุผล`;
+11. ถ้ามี field "externalResearch" (ทรรศนะที่ค้นจากเว็บต่างประเทศ) ให้ใช้เป็น "ข้อมูลเสริม" ประกอบ โดยเฉพาะข่าวเจ็บ/แบนล่าสุดและมุมมองแท็กติก — แต่ห้ามให้ทรรศนะเว็บลบล้างข้อมูลตัวเลขจริง (ฟอร์ม/ราคา/สถิติ) ถ้าขัดกันให้ยึดตัวเลขจริงเป็นหลักและระบุไว้ในเหตุผล
+12. handicapVerdict (สำคัญมาก — หัวใจความแม่นของราคาต่อรอง): ตัดสิน "ฝั่งที่กินราคาต่อรอง" ที่เส้น asianHandicapLine ด้วย "ดุลพินิจอิสระ" ของคุณเอง คิดจาก "การกระจายของส่วนต่างประตูที่น่าจะเป็นทั้งเกม" เทียบเส้น — ไม่ใช่ดูแค่สกอร์ที่ทายเป๊ะ
+    - คุณมีอิสระเต็มที่ในการชั่งน้ำหนัก: ฟอร์มบุก/รับ, สถิติประตูได้-เสีย, แรงจูงใจ, ตัวหลักเจ็บ/แบน, สไตล์การเล่น, ราคาตลาดที่ขยับ ฯลฯ — ค่าใดที่ "เซียนราคาตัวจริง" จะให้น้ำหนัก
+    - ตัวเต็งทายชนะ 1-0 แต่ถ้าประเมินว่ามีโอกาสสูงจะชนะ 2+ ลูก → เลือก HOME กินเส้น -1 ได้ (verdict ไม่จำเป็นต้องตรงกับสกอร์ที่ทาย)
+    - เลือก HOME/AWAY เมื่อเชื่อว่าฝั่งนั้น "กินเส้นเกินครึ่ง" จริง · เลือก PASS เมื่อก้ำกึ่งสูสีมาก หรือส่วนต่างน่าจะลงเท่าเส้นพอดี (push)
+    - ต้องสอดคล้องกับ handicapAssessmentTh/underdogAssessmentTh ที่คุณเขียน (อย่าให้ข้อความกับ verdict ขัดกันเอง)`;
 
 export function claudeEnabled(): boolean {
   return !!process.env.ANTHROPIC_API_KEY;
@@ -331,11 +342,17 @@ export function applyClaudeAnalysis(fixture: Fixture, a: ClaudeAnalysis): void {
     away: a.winProbability.away,
   };
 
-  /* ---- ฝั่งแฮนดิแคป/สูงต่ำ ปรับตามสกอร์ใหม่ (เส้นตลาดเดิม) ---- */
+  /* ---- แฮนดิแคป: ยึด "คำตัดสิน Claude" (อิสระจากสกอร์) ไม่มีค่อย derive จากสกอร์ ---- */
+  p.handicapVerdict = a.handicapVerdict ?? null;
   if (p.handicapLine !== null) {
-    // ใช้ helper ร่วม — รองรับ "เสมอราคา (คืนทุน)" เมื่อทายชนะเท่าเส้นพอดี
-    const side = handicapPickSide(a.expectedScore.home, a.expectedScore.away, p.handicapLine);
-    p.handicapPickTeam = handicapLabel(side, fixture.homeTeam.shortName, fixture.awayTeam.shortName, p.handicapLine);
+    p.handicapPickTeam = resolveHandicap(
+      a.handicapVerdict,
+      fixture.homeTeam.shortName,
+      fixture.awayTeam.shortName,
+      p.handicapLine,
+      a.expectedScore.home,
+      a.expectedScore.away
+    ).label;
   }
   if (p.overUnderLine !== null) {
     if (a.overUnderPick) {
