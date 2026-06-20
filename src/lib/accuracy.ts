@@ -156,7 +156,6 @@ export function resolveHandicap(
   expHome: number,
   expAway: number
 ): { side: "HOME" | "AWAY" | "PUSH" | null; label: string } {
-  if (verdict === "PASS") return { side: null, label: "ก้ำกึ่ง (ผ่าน)" };
   if (verdict === "HOME" || verdict === "AWAY")
     return { side: verdict, label: handicapLabel(verdict, homeShort, awayShort, ahLine) };
   const side = handicapPickSide(expHome, expAway, ahLine);
