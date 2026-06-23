@@ -144,9 +144,9 @@ export function effectiveOuPick(
 }
 
 /**
- * ฝั่ง+ป้ายแฮนดิแคป — ยึด "คำตัดสินของ Claude" (verdict) ก่อนเสมอ (ดุลพินิจอิสระ อิงโอกาสกินเส้น)
- * ถ้า Claude ไม่ได้ตัดสิน (null) ค่อย derive จากสกอร์ที่ทายเป็น fallback
- *   HOME/AWAY = ฝั่งที่กินราคา · PASS = ก้ำกึ่ง/เสมอราคา (ไม่ตัดสิน side=null)
+ * ฝั่ง+ป้ายแฮนดิแคป — ยึด "สกอร์ที่ทาย" เป็นหลักเสมอ (แฮนดิแคปห้ามสวนทางสกอร์)
+ *   เช่น ทาย 3-0 ที่เส้น -2.75 → ตัวเต็งกินเส้น (3 > 2.75) ต้องเลือกตัวเต็ง ไม่ใช่บอลรอง
+ * คำตัดสิน Claude (verdict) ใช้เป็น "ตัวตัดก้ำกึ่ง" เฉพาะตอนสกอร์ลงเท่าเส้นพอดี (push) เท่านั้น
  */
 export function resolveHandicap(
   verdict: "HOME" | "AWAY" | "PASS" | null | undefined,
@@ -156,9 +156,10 @@ export function resolveHandicap(
   expHome: number,
   expAway: number
 ): { side: "HOME" | "AWAY" | "PUSH" | null; label: string } {
-  if (verdict === "HOME" || verdict === "AWAY")
-    return { side: verdict, label: handicapLabel(verdict, homeShort, awayShort, ahLine) };
-  const side = handicapPickSide(expHome, expAway, ahLine);
+  const scoreSide = handicapPickSide(expHome, expAway, ahLine); // HOME/AWAY/PUSH
+  const side =
+    scoreSide === "PUSH" && (verdict === "HOME" || verdict === "AWAY") ? verdict : scoreSide;
+  if (side === "PUSH") return { side: null, label: "เสมอราคา (คืนทุน)" };
   return { side, label: handicapLabel(side, homeShort, awayShort, ahLine) };
 }
 
