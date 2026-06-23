@@ -20,7 +20,6 @@ import {
   Table2,
   Newspaper,
   Bell,
-  Settings,
   Activity,
   Search,
 } from "lucide-react";
@@ -45,7 +44,7 @@ const moreItems = [
   { href: "/news", label: "ข่าวสาร", icon: Newspaper },
   { href: "/alerts", label: "การแจ้งเตือน", icon: Bell },
   { href: "/backtest", label: "สถิติ AI (Backtest)", icon: Activity },
-  { href: "/settings", label: "ตั้งค่า", icon: Settings },
+  // ตั้งค่า: ซ่อนจากเมนู — เจ้าของเข้าตรงที่ /settings
 ];
 
 /** Mobile bottom navigation (hidden on desktop). */

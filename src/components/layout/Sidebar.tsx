@@ -17,7 +17,6 @@ import {
   Table2,
   Newspaper,
   Bell,
-  Settings,
   Crown,
   Star,
 } from "lucide-react";
@@ -44,7 +43,7 @@ const menu = [
   { href: "/team-stats", label: "สถิติทีม", icon: Table2 },
   { href: "/news", label: "ข่าวสาร", icon: Newspaper },
   { href: "/alerts", label: "การแจ้งเตือน", icon: Bell },
-  { href: "/settings", label: "ตั้งค่า", icon: Settings },
+  // ตั้งค่า: ซ่อนจากเมนู — เจ้าของเข้าตรงที่ /settings (มี Admin Panel ด้านใน auth ป้องกันอยู่แล้ว)
 ];
 
 export function Sidebar({ accuracy }: { accuracy: SidebarAccuracy }) {
