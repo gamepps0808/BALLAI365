@@ -157,9 +157,17 @@ export function resolveHandicap(
   expAway: number
 ): { side: "HOME" | "AWAY" | "PUSH" | null; label: string } {
   const scoreSide = handicapPickSide(expHome, expAway, ahLine); // HOME/AWAY/PUSH
-  const side =
-    scoreSide === "PUSH" && (verdict === "HOME" || verdict === "AWAY") ? verdict : scoreSide;
-  if (side === "PUSH") return { side: null, label: "เสมอราคา (คืนทุน)" };
+  // ฟันธงเสมอ ไม่มี "เสมอราคา":
+  //  - สกอร์ชี้ชัด (HOME/AWAY) → ตามสกอร์
+  //  - ทายชนะเท่าเส้นพอดี (push) → ใช้คำตัดสิน Claude ก่อน · ไม่มีก็เอนไปทาง "ตัวเต็ง" (ฝั่งที่เส้นต่อ)
+  const side: "HOME" | "AWAY" =
+    scoreSide === "HOME" || scoreSide === "AWAY"
+      ? scoreSide
+      : verdict === "HOME" || verdict === "AWAY"
+        ? verdict
+        : ahLine < 0
+          ? "HOME"
+          : "AWAY";
   return { side, label: handicapLabel(side, homeShort, awayShort, ahLine) };
 }
 
