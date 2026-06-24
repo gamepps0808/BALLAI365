@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Fixture } from "@/lib/types";
+import type { LiveRead } from "@/lib/claude-live";
 import { MatchOfTheDay } from "./MatchOfTheDay";
 import { MatchScanner } from "./MatchScanner";
 import { MatchDetailPanel } from "./MatchDetailPanel";
@@ -13,9 +14,11 @@ import { MatchDetailPanel } from "./MatchDetailPanel";
 export function DashboardMatches({
   fixtures,
   newDayLabel,
+  liveReads,
 }: {
   fixtures: Fixture[];
   newDayLabel: string;
+  liveReads?: Record<string, LiveRead>;
 }) {
   const motd = fixtures.find((f) => f.isMatchOfTheDay) ?? fixtures[0];
   // เก็บแค่ id ที่เลือก แล้ว derive fixture สดจาก props เสมอ —
@@ -33,7 +36,7 @@ export function DashboardMatches({
     <div className="grid gap-4 xl:grid-cols-[1fr_320px]">
       <div className="min-w-0 space-y-4">
         <div ref={heroRef} className="scroll-mt-24">
-          <MatchOfTheDay fixture={selected} />
+          <MatchOfTheDay fixture={selected} liveRead={liveReads?.[selected.id]} />
         </div>
         <div>
           <p className="mb-2 text-[12px] font-bold tracking-wide text-[var(--text-secondary)]">

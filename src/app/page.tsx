@@ -16,6 +16,8 @@ import {
   footballNewDay,
 } from "@/lib/service";
 import { loadSavedAnalysis } from "@/lib/claude-store";
+import { loadLiveRead } from "@/lib/live-store";
+import type { LiveRead } from "@/lib/claude-live";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +60,13 @@ export default async function DashboardPage() {
   });
 
   const hasLive = fixtures.some((f) => f.status === "LIVE") || liveCount > 0;
+  // ทรรศนะสด (Haiku) ของคู่ที่กำลังเตะ — ส่งเข้าการ์ดบอลเด่นบนหน้าหลัก
+  const liveReads: Record<string, LiveRead> = {};
+  for (const f of fixtures) {
+    if (f.status !== "LIVE") continue;
+    const read = loadLiveRead<LiveRead>(f.id);
+    if (read) liveReads[f.id] = read;
+  }
   return (
     <main>
       {/* นาที/สกอร์ของคู่ที่กำลังเตะต้องเดินเอง — รีเฟรชเฉพาะตอนมีบอลสด */}
@@ -111,7 +120,12 @@ export default async function DashboardPage() {
         </div>
 
         {motd ? (
-          <DashboardMatches key={motd.id} fixtures={fixtures} newDayLabel={newDayLabel} />
+          <DashboardMatches
+            key={motd.id}
+            fixtures={fixtures}
+            newDayLabel={newDayLabel}
+            liveReads={liveReads}
+          />
         ) : (
           <div className="glass p-12 text-center text-[13px] text-[var(--text-muted)]">
             {`ยังไม่มีโปรแกรมบอลวันใหม่ (${newDayLabel}) ในลีกที่เปิดใช้งาน — บอลที่เหลือของวันนี้ดูได้ที่แมตช์วันนี้`}

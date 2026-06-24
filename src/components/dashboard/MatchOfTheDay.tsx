@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Star, Trophy, CheckCircle2, UserRound } from "lucide-react";
+import { Star, Trophy, CheckCircle2, UserRound, Radio } from "lucide-react";
 import { Fixture } from "@/lib/types";
+import type { LiveRead } from "@/lib/claude-live";
 import { TeamLogo } from "../ui/TeamLogo";
 import { PlayerPhoto } from "../ui/PlayerPhoto";
 import { FormBadges } from "../ui/FormBadges";
@@ -17,7 +18,13 @@ import {
   valueTone,
 } from "@/lib/engine/labels";
 
-export function MatchOfTheDay({ fixture }: { fixture: Fixture }) {
+export function MatchOfTheDay({
+  fixture,
+  liveRead,
+}: {
+  fixture: Fixture;
+  liveRead?: LiveRead | null;
+}) {
   const { homeTeam: home, awayTeam: away, league } = fixture;
   const p = fixture.prediction;
   const keyPlayers = [fixture.homeKeyPlayer, fixture.awayKeyPlayer].filter(
@@ -26,6 +33,25 @@ export function MatchOfTheDay({ fixture }: { fixture: Fixture }) {
 
   return (
     <section className="glass glow-green p-4 lg:p-5">
+      {/* LIVE AI — ทรรศนะสด (เฉพาะตอนกำลังเตะ + มีผลจาก cron) */}
+      {fixture.status === "LIVE" && liveRead && (
+        <div className="mb-3 rounded-xl border border-[rgba(255,77,94,0.4)] bg-[rgba(255,77,94,0.06)] p-3">
+          <h3 className="flex items-center gap-1.5 text-[11px] font-extrabold tracking-wider text-[var(--danger)]">
+            <Radio size={12} className="animate-pulse" /> LIVE AI — อัปเดตสด
+            <span className="tabular ml-auto text-[10px] font-normal text-[var(--text-muted)]">
+              นาที {liveRead.minute ?? "-"} · {liveRead.score}
+            </span>
+          </h3>
+          <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--text-secondary)]">
+            {liveRead.readTh}
+          </p>
+          {liveRead.leanTh && (
+            <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--neon-blue)]">
+              แนวโน้ม: {liveRead.leanTh}
+            </p>
+          )}
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center gap-2">
         <Star size={16} className="fill-[var(--neon-green)] text-[var(--neon-green)]" />
