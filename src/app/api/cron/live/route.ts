@@ -49,7 +49,8 @@ export async function GET(request: NextRequest) {
       const total = (f.homeGoals ?? 0) + (f.awayGoals ?? 0);
       // ยังไม่มีประตู/ใบแดง/พักครึ่ง = ไม่มีอะไรให้พูด ข้ามไป (ประหยัด)
       if (total === 0 && reds === 0 && !htSeen) continue;
-      const sig = `${f.homeGoals ?? 0}-${f.awayGoals ?? 0}|red${reds}|${htSeen ? "ht" : ""}`;
+      // ขึ้นต้น "s2" = ใช้ Sonnet (เปลี่ยนเวอร์ชัน = ทรรศนะเก่าจาก Haiku ถือว่าเก่า รีเฟรชใหม่)
+      const sig = `s2|${f.homeGoals ?? 0}-${f.awayGoals ?? 0}|red${reds}|${htSeen ? "ht" : ""}`;
       if (prev?.signature === sig) continue; // ไม่มีเหตุการณ์ใหม่
       const read = await analyzeLiveMatch(f, events, sig);
       if (read) {

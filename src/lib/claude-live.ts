@@ -84,7 +84,7 @@ export async function analyzeLiveMatch(
 
     const client = new Anthropic();
     const res = await client.messages.parse({
-      model: "claude-haiku-4-5",
+      model: "claude-sonnet-4-6",
       max_tokens: 1500,
       system: LIVE_SYSTEM,
       messages: [{ role: "user", content: `อ่านเกมสดนี้:\n${JSON.stringify(facts, null, 1)}` }],
