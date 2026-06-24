@@ -124,7 +124,7 @@ export default async function MatchDetailPage({
             <h3 className="flex items-center gap-1.5 text-[12px] font-extrabold tracking-wider text-[var(--danger)]">
               <Radio size={13} className="animate-pulse" /> LIVE AI — อัปเดตสด
               <span className="tabular ml-auto text-[10px] font-normal text-[var(--text-muted)]">
-                นาที {liveRead.minute ?? "-"} · {liveRead.score}
+                {liveRead.phase ?? `นาที ${liveRead.minute ?? "-"}`} · {liveRead.score}
               </span>
             </h3>
             <p className="mt-2 text-[13px] leading-relaxed text-[var(--text-secondary)]">

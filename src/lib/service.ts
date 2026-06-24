@@ -207,6 +207,7 @@ export async function fetchLiteFixtures(
             hour: "2-digit", minute: "2-digit", timeZone: "Asia/Bangkok",
           }),
           status: mapStatus(f.fixture.status.short),
+          statusShort: f.fixture.status.short,
           leagueName: f.league.name,
           leagueCountry: f.league.country,
           leagueLogo: f.league.logo,

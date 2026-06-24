@@ -39,7 +39,7 @@ export function MatchOfTheDay({
           <h3 className="flex items-center gap-1.5 text-[11px] font-extrabold tracking-wider text-[var(--danger)]">
             <Radio size={12} className="animate-pulse" /> LIVE AI — อัปเดตสด
             <span className="tabular ml-auto text-[10px] font-normal text-[var(--text-muted)]">
-              นาที {liveRead.minute ?? "-"} · {liveRead.score}
+              {liveRead.phase ?? `นาที ${liveRead.minute ?? "-"}`} · {liveRead.score}
             </span>
           </h3>
           <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--text-secondary)]">

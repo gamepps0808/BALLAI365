@@ -43,11 +43,13 @@ export async function GET(request: NextRequest) {
       const reds = (events ?? []).filter(
         (e) => e.type === "Card" && /Red/i.test(e.detail ?? "")
       ).length;
-      const total = (f.homeGoals ?? 0) + (f.awayGoals ?? 0);
-      // ยังไม่มีประตู/ใบแดง = ไม่มีอะไรให้พูด ข้ามไป (ประหยัด)
-      if (total === 0 && reds === 0) continue;
-      const sig = `${f.homeGoals ?? 0}-${f.awayGoals ?? 0}|red${reds}`;
       const prev = loadLiveRead<{ signature: string }>(f.id);
+      // พักครึ่ง: ทริกครั้งเดียว แล้วจำไว้ใน signature (ไม่ยิงซ้ำตอนครึ่งหลังเริ่ม)
+      const htSeen = f.statusShort === "HT" || (prev?.signature?.includes("|ht") ?? false);
+      const total = (f.homeGoals ?? 0) + (f.awayGoals ?? 0);
+      // ยังไม่มีประตู/ใบแดง/พักครึ่ง = ไม่มีอะไรให้พูด ข้ามไป (ประหยัด)
+      if (total === 0 && reds === 0 && !htSeen) continue;
+      const sig = `${f.homeGoals ?? 0}-${f.awayGoals ?? 0}|red${reds}|${htSeen ? "ht" : ""}`;
       if (prev?.signature === sig) continue; // ไม่มีเหตุการณ์ใหม่
       const read = await analyzeLiveMatch(f, events, sig);
       if (read) {

@@ -14,6 +14,8 @@ export interface LiveRead {
   readTh: string;
   leanTh: string | null;
   minute: number | null;
+  /** ป้ายช่วงเวลา (เช่น "พักครึ่ง") — ถ้ามี ใช้แทน "นาที X" บนกล่อง */
+  phase?: string;
   score: string;
   signature: string;
   at: string;
@@ -32,7 +34,8 @@ const LiveSchema = z.object({
 const LIVE_SYSTEM = `คุณคือเซียนวิเคราะห์บอลสด อ่านสถานการณ์ปัจจุบันจากสกอร์ นาที และเหตุการณ์ในสนาม เทียบกับคำทายก่อนแข่ง แล้วสรุปสั้น กระชับ เป็นกันเอง ภาษาไทย
 - ห้ามเดาข้อมูลที่ไม่มี · ห้ามใช้คำว่า การันตี/ชัวร์/แน่นอน
 - พูดถึงจังหวะล่าสุด (ใครเพิ่งได้ประตู/ใบแดง) และผลต่อทิศทางเกม
-- ถ้าทรงต่างจากที่ทายก่อนแข่ง ให้บอกตรง ๆ`;
+- ถ้าทรงต่างจากที่ทายก่อนแข่ง ให้บอกตรง ๆ
+- ถ้า "พักครึ่ง": readTh = สรุปครึ่งแรกสั้น ๆ (ใครคุมเกม/จุดเด่น), leanTh = คาดทิศทางครึ่งหลัง + ราคา/สูง-ต่ำที่น่าสนใจ`;
 
 export async function analyzeLiveMatch(
   f: LiteFixture,
@@ -56,9 +59,11 @@ export async function analyzeLiveMatch(
           `${e.time?.elapsed ?? "?"}' ${e.type === "Goal" ? "ประตู" : "ใบแดง"} — ${e.player?.name ?? "?"} (${e.team?.name ?? "?"})`
       );
 
+    const isHT = f.statusShort === "HT";
     const facts = {
       คู่: `${f.homeName} vs ${f.awayName}`,
       ลีก: f.leagueName,
+      สถานะ: isHT ? "พักครึ่ง (ครึ่งแรกจบแล้ว)" : "กำลังแข่ง",
       นาทีปัจจุบัน: f.elapsed ?? null,
       สกอร์ปัจจุบัน: `${f.homeName} ${f.homeGoals ?? 0} - ${f.awayGoals ?? 0} ${f.awayName}`,
       คำทายก่อนแข่ง: pre
@@ -81,6 +86,7 @@ export async function analyzeLiveMatch(
       readTh: out.readTh,
       leanTh: out.leanTh ?? null,
       minute: f.elapsed ?? null,
+      phase: isHT ? "พักครึ่ง" : undefined,
       score: `${f.homeGoals ?? 0}-${f.awayGoals ?? 0}`,
       signature,
       at: new Date().toISOString(),

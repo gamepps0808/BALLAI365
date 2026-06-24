@@ -320,6 +320,8 @@ export interface LiteFixture {
   kickoff: string;
   kickoffLabel: string;
   status: "SCHEDULED" | "LIVE" | "FINISHED" | "CANCELLED" | "POSTPONED";
+  /** สถานะดิบจาก API (1H/HT/2H/ET/FT...) — ใช้จับ "พักครึ่ง" สำหรับวิเคราะห์สด */
+  statusShort?: string;
   leagueName: string;
   leagueCountry: string;
   leagueLogo?: string;
