@@ -13,6 +13,7 @@ import {
   Globe,
   Link2,
   Scale,
+  Radio,
 } from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
 import { Disclaimer } from "@/components/ui/Disclaimer";
@@ -30,6 +31,8 @@ import { LiveCenter } from "@/components/match/LiveCenter";
 import { AutoRefresh } from "@/components/ui/AutoRefresh";
 import { DevDebugPanel } from "@/components/dev/DevDebugPanel";
 import { fetchFixture } from "@/lib/service";
+import { loadLiveRead } from "@/lib/live-store";
+import { LiveRead } from "@/lib/claude-live";
 import {
   confidenceLabel,
   confidenceTone,
@@ -85,6 +88,8 @@ export default async function MatchDetailPage({
 
   const { homeTeam: home, awayTeam: away, league } = fixture;
   const p = fixture.prediction;
+  // ทรรศนะสด (เฉพาะแมตช์ที่กำลังเตะ) — สร้างโดย cron/live ด้วย Haiku
+  const liveRead = fixture.status === "LIVE" ? loadLiveRead<LiveRead>(fixture.id) : null;
 
   return (
     <main>
@@ -112,6 +117,26 @@ export default async function MatchDetailPage({
         </div>
 
         <ProviderBanner provider={provider} fallback={fallback} error={error} />
+
+        {/* ============ LIVE AI — ทรรศนะสด (Haiku) ============ */}
+        {liveRead && (
+          <section className="glass border-[rgba(255,77,94,0.4)] p-4">
+            <h3 className="flex items-center gap-1.5 text-[12px] font-extrabold tracking-wider text-[var(--danger)]">
+              <Radio size={13} className="animate-pulse" /> LIVE AI — อัปเดตสด
+              <span className="tabular ml-auto text-[10px] font-normal text-[var(--text-muted)]">
+                นาที {liveRead.minute ?? "-"} · {liveRead.score}
+              </span>
+            </h3>
+            <p className="mt-2 text-[13px] leading-relaxed text-[var(--text-secondary)]">
+              {liveRead.readTh}
+            </p>
+            {liveRead.leanTh && (
+              <p className="mt-2 rounded-lg bg-[var(--neon-blue-soft)] px-3 py-2 text-[12px] leading-relaxed text-[var(--neon-blue)]">
+                แนวโน้ม: {liveRead.leanTh}
+              </p>
+            )}
+          </section>
+        )}
 
         {/* ============ 1. AI SUMMARY ============ */}
         <section className="glass glow-green p-4 lg:p-5">

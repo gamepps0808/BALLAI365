@@ -126,7 +126,7 @@ export async function analyzeFixtureWithClaude(
       // (คืน null เมื่อข้อมูลยังไม่พอ — ไม่เสี่ยง over-correct จากฐานเล็ก)
       const selfReview = buildSelfReview();
       const response = await client.messages.parse({
-        model: "claude-opus-4-8",
+        model: "claude-sonnet-4-6",
         max_tokens: 16000,
         thinking: { type: "adaptive" },
         system: SYSTEM_PROMPT,
@@ -320,7 +320,7 @@ export function applyClaudeAnalysis(fixture: Fixture, a: ClaudeAnalysis): void {
   const ensemblePick = p.pick;
 
   p.modelOutputs.push({
-    model: "Claude AI Analyst (claude-opus-4-8)",
+    model: "Claude AI Analyst (claude-sonnet-4-6)",
     modelTh: "Claude AI วิเคราะห์",
     homeProb: a.winProbability.home,
     drawProb: a.winProbability.draw,
