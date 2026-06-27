@@ -228,7 +228,7 @@ export function MatchOfTheDay({
           </p>
         </div>
         <div className="glass p-2.5 text-center">
-          <p className="text-[9px] font-semibold tracking-wider text-[var(--text-muted)]">แฮนดิแคป</p>
+          <p className="text-[9px] font-semibold tracking-wider text-[var(--text-muted)]">แนะนำเล่น</p>
           <p className="mt-1 text-[11px] font-bold leading-tight text-[var(--soft-purple)]">
             {p.handicapPickTeam ?? "—"}
           </p>
@@ -248,7 +248,7 @@ export function MatchOfTheDay({
         {[
           { label: "EXPECTED SCORE", value: `${p.expectedScore.home} - ${p.expectedScore.away}`, sub: "AI ทาย · อัปเดตล่าสุดก่อนเตะ" },
           p.handicapPickTeam !== null
-            ? { label: "HANDICAP PICK", value: p.handicapPickTeam, sub: `แต้มต่อ ${p.handicapLine}`, accent: "var(--soft-purple)" }
+            ? { label: "HANDICAP PICK", value: `แนะนำเล่น ${p.handicapPickTeam}`, sub: `แต้มต่อ ${p.handicapLine}`, accent: "var(--soft-purple)" }
             : { label: "HANDICAP PICK", value: "ไม่มีข้อมูลแฮนดิแคป", sub: "Missing Data", accent: "var(--text-muted)" },
           p.overUnderPick !== null
             ? { label: "OVER / UNDER PICK", value: `${p.overUnderPick === "OVER" ? "Over" : "Under"} ${p.overUnderLine}`, sub: p.overUnderNote ?? `สกอร์รวม ${p.overUnderLine}`, accent: "var(--soft-purple)" }

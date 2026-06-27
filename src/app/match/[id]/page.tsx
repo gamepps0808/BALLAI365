@@ -204,7 +204,7 @@ export default async function MatchDetailPage({
               { l: "WIN PROBABILITY", v: `${p.winProbability.home}/${p.winProbability.draw}/${p.winProbability.away}`, s: `${home.shortName}/เสมอ/${away.shortName} (%)` },
               { l: "EXPECTED SCORE", v: `${p.expectedScore.home} - ${p.expectedScore.away}`, s: "สกอร์ที่คาด" },
               p.handicapPickTeam !== null
-                ? { l: "HANDICAP PICK", v: p.handicapPickTeam, s: "แต้มต่อ (Asian Handicap)" }
+                ? { l: "HANDICAP PICK", v: `แนะนำเล่น ${p.handicapPickTeam}`, s: "แต้มต่อ (Asian Handicap)" }
                 : { l: "HANDICAP PICK", v: "ไม่มีข้อมูลแฮนดิแคป", s: "Missing Data", muted: true },
               p.overUnderPick !== null
                 ? { l: "OVER/UNDER PICK", v: `${p.overUnderPick === "OVER" ? "Over" : "Under"} ${p.overUnderLine}`, s: p.overUnderNote ?? "สกอร์รวม" }
