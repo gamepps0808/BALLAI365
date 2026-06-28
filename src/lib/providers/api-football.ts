@@ -221,9 +221,12 @@ export class ApiFootballProvider implements FootballDataProvider {
       }
     }
 
-    // Match of the Day = highest AI score among matches not yet kicked off
+    // Match of the Day = คู่ AI Score สูงสุด "ในกลุ่มที่ข้อมูลพอ" และยังไม่เตะ
+    // กันไม่ให้คู่ DATA QUALITY 0 (เจ้ามือยังไม่เปิดราคา) ขึ้นเป็นตัวเด่นหน้าแรก
     const pool = fixtures.filter((f) => f.status === "SCHEDULED");
-    const best = (pool.length > 0 ? pool : fixtures).reduce<Fixture | null>(
+    const base = pool.length > 0 ? pool : fixtures;
+    const ready = base.filter((f) => f.prediction.dataQuality >= 40);
+    const best = (ready.length > 0 ? ready : base).reduce<Fixture | null>(
       (a, b) => (!a || b.prediction.aiScore > a.prediction.aiScore ? b : a),
       null
     );

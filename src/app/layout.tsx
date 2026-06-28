@@ -4,6 +4,7 @@ import "./globals.css";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { getAccuracySummary } from "@/lib/accuracy";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { Footer } from "@/components/layout/Footer";
 import { SITE_URL, SITE_NAME, SITE_TAGLINE } from "@/lib/seo";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { siteJsonLd } from "@/lib/jsonld";
@@ -75,7 +76,10 @@ export default function RootLayout({
             ]),
           }}
         />
-        <div className="pb-16 lg:pb-0 lg:pl-60">{children}</div>
+        <div className="pb-16 lg:pb-0 lg:pl-60">
+          {children}
+          <Footer />
+        </div>
         <BottomNav />
       </body>
     </html>

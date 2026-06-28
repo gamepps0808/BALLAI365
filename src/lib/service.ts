@@ -245,8 +245,11 @@ export function pickMatchOfTheDay(fixtures: Fixture[]): Fixture | null {
   // prefer matches that have not kicked off — finished games belong in ผลบอลย้อนหลัง
   const upcoming = fixtures.filter((f) => f.status === "SCHEDULED");
   const pool = upcoming.length > 0 ? upcoming : fixtures;
+  // เลือกจากคู่ที่ "ข้อมูลพอ" ก่อน — กันคู่ DATA QUALITY 0 ขึ้นเป็นตัวเด่น
+  const ready = pool.filter((f) => f.prediction.dataQuality >= 40);
+  const candidates = ready.length > 0 ? ready : pool;
   return (
-    pool.find((f) => f.isMatchOfTheDay) ??
-    pool.reduce((a, b) => (b.prediction.aiScore > a.prediction.aiScore ? b : a))
+    candidates.find((f) => f.isMatchOfTheDay) ??
+    candidates.reduce((a, b) => (b.prediction.aiScore > a.prediction.aiScore ? b : a))
   );
 }
