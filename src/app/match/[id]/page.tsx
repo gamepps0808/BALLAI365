@@ -180,22 +180,26 @@ export default async function MatchDetailPage({
               </p>
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <Badge tone={confidenceTone[p.confidence]}>
-                  CONFIDENCE {confidenceLabel[p.confidence]}
+                  ความมั่นใจ {confidenceLabel[p.confidence]}
                 </Badge>
-                <Badge tone={riskTone[p.risk]}>RISK {riskLabel[p.risk]}</Badge>
+                <Badge tone={riskTone[p.risk]}>ความเสี่ยง {riskLabel[p.risk]}</Badge>
                 <Badge tone={valueTone[p.value]}>{valueLabel[p.value]}</Badge>
                 <Badge tone={statusTone[p.status]}>{statusLabel[p.status]}</Badge>
                 <Stars count={p.valueStars} />
               </div>
+              <p className="mt-2 max-w-md text-[10.5px] leading-relaxed text-[var(--text-muted)]">
+                หมายเหตุ &quot;ความคุ้ม&quot; = ราคาเจ้ามือคุ้มกว่าโอกาสจริงไหม —
+                &quot;ราคาไม่คุ้ม&quot; ไม่ได้แปลว่า AI ทายผิด แค่ราคาเตี้ย (คนส่วนใหญ่เล่นฝั่งนี้)
+              </p>
             </div>
             <div className="flex items-center gap-5">
               <div className="text-center">
                 <ScoreRing score={p.aiScore} size={104} />
-                <p className="mt-1 text-[10px] tracking-wider text-[var(--text-muted)]">AI SCORE</p>
+                <p className="mt-1 text-[10px] tracking-wider text-[var(--text-muted)]">คะแนน AI</p>
               </div>
               <div className="text-center">
                 <ScoreRing score={p.dataQuality} size={104} />
-                <p className="mt-1 text-[10px] tracking-wider text-[var(--text-muted)]">DATA QUALITY</p>
+                <p className="mt-1 text-[10px] tracking-wider text-[var(--text-muted)]">คุณภาพข้อมูล</p>
               </div>
             </div>
           </div>

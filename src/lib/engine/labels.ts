@@ -23,17 +23,17 @@ export function aiScoreTone(score: number): Tone {
 }
 
 export function aiScoreLabel(score: number): string {
-  if (score >= 80) return "Strong";
-  if (score >= 65) return "Watchlist";
-  if (score >= 50) return "Medium";
-  return "Avoid";
+  if (score >= 80) return "เด่น";
+  if (score >= 65) return "น่าจับตา";
+  if (score >= 50) return "ปานกลาง";
+  return "เลี่ยง";
 }
 
 export const confidenceLabel: Record<ConfidenceLevel, string> = {
-  VERY_HIGH: "VERY HIGH",
-  HIGH: "HIGH",
-  MEDIUM: "MEDIUM",
-  LOW: "LOW",
+  VERY_HIGH: "มั่นใจมาก",
+  HIGH: "มั่นใจสูง",
+  MEDIUM: "มั่นใจปานกลาง",
+  LOW: "มั่นใจน้อย",
 };
 
 export const confidenceTone: Record<ConfidenceLevel, Tone> = {
@@ -44,10 +44,10 @@ export const confidenceTone: Record<ConfidenceLevel, Tone> = {
 };
 
 export const riskLabel: Record<RiskLevel, string> = {
-  LOW: "LOW",
-  MEDIUM: "MEDIUM",
-  HIGH: "HIGH",
-  VERY_HIGH: "VERY HIGH",
+  LOW: "เสี่ยงต่ำ",
+  MEDIUM: "เสี่ยงปานกลาง",
+  HIGH: "เสี่ยงสูง",
+  VERY_HIGH: "เสี่ยงสูงมาก",
 };
 
 export const riskTone: Record<RiskLevel, Tone> = {
@@ -58,11 +58,11 @@ export const riskTone: Record<RiskLevel, Tone> = {
 };
 
 export const valueLabel: Record<ValueRating, string> = {
-  NO_VALUE: "NO VALUE",
-  SMALL_VALUE: "SMALL VALUE",
-  GOOD_VALUE: "GOOD VALUE",
-  STRONG_VALUE: "STRONG VALUE",
-  ELITE_VALUE: "ELITE VALUE",
+  NO_VALUE: "ราคาไม่คุ้ม",
+  SMALL_VALUE: "คุ้มเล็กน้อย",
+  GOOD_VALUE: "ราคาคุ้ม",
+  STRONG_VALUE: "คุ้มมาก",
+  ELITE_VALUE: "คุ้มสุด ๆ",
 };
 
 export const valueTone: Record<ValueRating, Tone> = {
@@ -74,10 +74,10 @@ export const valueTone: Record<ValueRating, Tone> = {
 };
 
 export const statusLabel: Record<MatchStatus, string> = {
-  ACTIVE: "ACTIVE",
-  WATCHLIST: "WATCHLIST",
-  REJECTED: "REJECTED",
-  AVOID: "AVOID",
+  ACTIVE: "น่าเล่น",
+  WATCHLIST: "น่าจับตา",
+  REJECTED: "ข้าม",
+  AVOID: "เลี่ยง",
 };
 
 export const statusTone: Record<MatchStatus, Tone> = {
