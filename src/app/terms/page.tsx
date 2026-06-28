@@ -24,7 +24,7 @@ const SECTIONS: { title: string; body: string }[] = [
   },
   {
     title: "4. ความรับผิดชอบของผู้ใช้",
-    body: `การตัดสินใจใด ๆ จากข้อมูลในเว็บไซต์เป็นความรับผิดชอบของผู้ใช้เองทั้งหมด โปรดใช้วิจารณญาณ และเล่นอย่างมีความรับผิดชอบ`,
+    body: `การตัดสินใจใด ๆ จากข้อมูลในเว็บไซต์เป็นความรับผิดชอบของผู้ใช้เองทั้งหมด โปรดใช้วิจารณญาณในการตัดสินใจ`,
   },
   {
     title: "5. ทรัพย์สินทางปัญญา",
@@ -61,8 +61,7 @@ export default function TermsPage() {
 
         <section className="rounded-xl border border-[var(--border)] p-4 text-[12px] text-[var(--text-muted)]">
           ดูเพิ่มเติม:{" "}
-          <Link href="/privacy" className="text-[var(--neon-green)] hover:underline">นโยบายความเป็นส่วนตัว</Link>{" · "}
-          <Link href="/responsible" className="text-[var(--neon-green)] hover:underline">เล่นอย่างมีความรับผิดชอบ</Link>
+          <Link href="/privacy" className="text-[var(--neon-green)] hover:underline">นโยบายความเป็นส่วนตัว</Link>
         </section>
       </div>
     </main>

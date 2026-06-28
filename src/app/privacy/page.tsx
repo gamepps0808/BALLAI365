@@ -57,8 +57,7 @@ export default function PrivacyPage() {
 
         <section className="rounded-xl border border-[var(--border)] p-4 text-[12px] text-[var(--text-muted)]">
           ดูเพิ่มเติม:{" "}
-          <Link href="/terms" className="text-[var(--neon-green)] hover:underline">เงื่อนไขการใช้งาน</Link>{" · "}
-          <Link href="/responsible" className="text-[var(--neon-green)] hover:underline">เล่นอย่างมีความรับผิดชอบ</Link>
+          <Link href="/terms" className="text-[var(--neon-green)] hover:underline">เงื่อนไขการใช้งาน</Link>
         </section>
       </div>
     </main>

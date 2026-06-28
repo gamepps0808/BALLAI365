@@ -147,7 +147,7 @@ export default function AboutPage() {
         {/* Disclaimer */}
         <section className="rounded-xl border border-[var(--border)] p-4">
           <p className="flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-[var(--text-muted)]">
-            <ShieldCheck size={13} /> 18+ · เล่นอย่างมีความรับผิดชอบ
+            <ShieldCheck size={13} /> 18+ · เพื่อข้อมูลและความบันเทิงเท่านั้น
           </p>
           <p className="mt-2 text-[12px] leading-relaxed text-[var(--text-muted)]">
             การวิเคราะห์ทั้งหมดเป็นการประเมินจากสถิติและ AI เท่านั้น

@@ -30,7 +30,6 @@ const COLS: { title: string; links: [string, string][] }[] = [
     links: [
       ["เงื่อนไขการใช้งาน", "/terms"],
       ["ความเป็นส่วนตัว", "/privacy"],
-      ["เล่นอย่างมีความรับผิดชอบ", "/responsible"],
     ],
   },
 ];
@@ -82,7 +81,7 @@ export function Footer() {
       <div className="mx-auto mt-8 max-w-6xl border-t border-[var(--border)] pt-5 text-[11px] leading-relaxed text-[var(--text-muted)]">
         <p>
           การวิเคราะห์ทั้งหมดเป็นการประเมินจากสถิติและ AI เท่านั้น ผลการแข่งขันฟุตบอลมีความไม่แน่นอน
-          — ไม่ใช่การรับประกันผล โปรดใช้วิจารณญาณและเล่นอย่างมีความรับผิดชอบ
+          — ไม่ใช่การรับประกันผล โปรดใช้วิจารณญาณในการตัดสินใจ
         </p>
         <p className="mt-2">© {year} {SITE_NAME} · สงวนลิขสิทธิ์</p>
       </div>

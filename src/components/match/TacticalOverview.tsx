@@ -35,7 +35,7 @@ export function TacticalOverview({ fixture }: { fixture: Fixture }) {
 
   return (
     <section className="glass p-4">
-      <h3 className="text-[12px] font-extrabold tracking-wider">TACTICAL OVERVIEW</h3>
+      <h3 className="text-[12px] font-extrabold tracking-wider">ภาพรวมแทคติก</h3>
 
       {/* ป้ายแผนการเล่น */}
       <div className="mt-2 flex items-center justify-between text-[12px] font-bold">

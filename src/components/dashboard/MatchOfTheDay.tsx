@@ -57,7 +57,7 @@ export function MatchOfTheDay({
       <div className="flex items-center gap-2">
         <Star size={16} className="fill-[var(--neon-green)] text-[var(--neon-green)]" />
         <h2 className="text-sm font-extrabold tracking-widest text-[var(--neon-green)]">
-          {fixture.isMatchOfTheDay ? "AI MATCH OF THE DAY" : "คู่ที่เลือกดู"}
+          {fixture.isMatchOfTheDay ? "บอลเด่นวันนี้ (AI)" : "คู่ที่เลือกดู"}
         </h2>
         {!fixture.isMatchOfTheDay && (
           <span className="rounded bg-[var(--neon-blue-soft)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--neon-blue)]">
@@ -133,7 +133,7 @@ export function MatchOfTheDay({
         {/* Pick */}
         <div className="rounded-xl border border-[var(--border-glow-green)] bg-[var(--neon-green-soft)] p-4">
           <p className="flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-[var(--gold)]">
-            <Trophy size={13} /> AI PICK
+            <Trophy size={13} /> AI เลือก
           </p>
           <p className="text-glow-green mt-1 text-xl font-black text-[var(--neon-green)] lg:text-2xl">
             {p.pickLabel}
@@ -167,7 +167,7 @@ export function MatchOfTheDay({
         {/* Win probability */}
         <div className="glass p-4">
           <p className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)]">
-            WIN PROBABILITY
+            โอกาสชนะ
           </p>
           {/* grid 3 คอลัมน์เท่ากัน — ตัวเลขตรงแนวเดียวกันเสมอ ชื่อทีมยาวถูกตัดด้วย … */}
           <div className="mt-2 grid grid-cols-3 gap-2">
@@ -197,7 +197,7 @@ export function MatchOfTheDay({
           {/* AI Score */}
           <div className="glass flex flex-col items-center justify-center p-4">
             <p className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)]">
-              AI SCORE
+              คะแนน AI
             </p>
             <ScoreRing score={p.aiScore} size={88} />
           </div>
@@ -205,15 +205,15 @@ export function MatchOfTheDay({
           {/* Confidence / Risk / Value */}
           <div className="glass flex flex-col justify-center gap-2.5 p-4 text-[12px]">
             <div className="flex items-center justify-between gap-3">
-              <span className="text-[var(--text-muted)]">CONFIDENCE</span>
+              <span className="text-[var(--text-muted)]">ความมั่นใจ</span>
               <Badge tone={confidenceTone[p.confidence]}>{confidenceLabel[p.confidence]}</Badge>
             </div>
             <div className="flex items-center justify-between gap-3">
-              <span className="text-[var(--text-muted)]">RISK</span>
+              <span className="text-[var(--text-muted)]">ความเสี่ยง</span>
               <Badge tone={riskTone[p.risk]}>{riskLabel[p.risk]}</Badge>
             </div>
             <div className="flex items-center justify-between gap-3">
-              <span className="text-[var(--text-muted)]">VALUE</span>
+              <span className="text-[var(--text-muted)]">ความคุ้ม</span>
               <Badge tone={valueTone[p.value]}>{valueLabel[p.value]}</Badge>
             </div>
           </div>
@@ -247,18 +247,18 @@ export function MatchOfTheDay({
       {/* Stat strip — ซ่อนบนมือถือ (ดูครบในหน้าวิเคราะห์เต็ม) โชว์เฉพาะคอม */}
       <div className="mt-3 hidden gap-3 lg:grid lg:grid-cols-3 xl:grid-cols-6">
         {[
-          { label: "EXPECTED SCORE", value: `${p.expectedScore.home} - ${p.expectedScore.away}`, sub: "AI ทาย · อัปเดตล่าสุดก่อนเตะ" },
+          { label: "สกอร์ที่ทาย", value: `${p.expectedScore.home} - ${p.expectedScore.away}`, sub: "AI ทาย · อัปเดตล่าสุดก่อนเตะ" },
           p.handicapPickTeam !== null
-            ? { label: "HANDICAP PICK", value: `แนะนำเล่น ${p.handicapPickTeam}`, sub: `แต้มต่อ ${p.handicapLine}`, accent: "var(--soft-purple)" }
-            : { label: "HANDICAP PICK", value: "ไม่มีข้อมูลแฮนดิแคป", sub: "Missing Data", accent: "var(--text-muted)" },
+            ? { label: "แฮนดิแคป", value: `แนะนำเล่น ${p.handicapPickTeam}`, sub: `แต้มต่อ ${p.handicapLine}`, accent: "var(--soft-purple)" }
+            : { label: "แฮนดิแคป", value: "ไม่มีข้อมูลแฮนดิแคป", sub: "ไม่มีข้อมูล", accent: "var(--text-muted)" },
           p.overUnderPick !== null
-            ? { label: "OVER / UNDER PICK", value: `${p.overUnderPick === "OVER" ? "Over" : "Under"} ${p.overUnderLine}`, sub: p.overUnderNote ?? `สกอร์รวม ${p.overUnderLine}`, accent: "var(--soft-purple)" }
-            : { label: "OVER / UNDER PICK", value: "ไม่มีข้อมูลสูงต่ำ", sub: "Missing Data", accent: "var(--text-muted)" },
+            ? { label: "สูง / ต่ำ", value: `${p.overUnderPick === "OVER" ? "สูง" : "ต่ำ"} ${p.overUnderLine}`, sub: p.overUnderNote ?? `สกอร์รวม ${p.overUnderLine}`, accent: "var(--soft-purple)" }
+            : { label: "สูง / ต่ำ", value: "ไม่มีข้อมูลสูงต่ำ", sub: "ไม่มีข้อมูล", accent: "var(--text-muted)" },
           p.cornerPick !== null
-            ? { label: "CORNER PICK", value: `${p.cornerPick === "OVER" ? "Over" : "Under"} ${p.cornerLine}`, sub: `เตะมุมรวม ${p.cornerLine}`, accent: "var(--soft-purple)" }
-            : { label: "CORNER PICK", value: "ไม่มีข้อมูลเตะมุม", sub: "Missing Data", accent: "var(--text-muted)" },
-          { label: "VALUE RATING", value: "", sub: "Value Rating", stars: p.valueStars },
-          { label: "DATA QUALITY", value: `${p.dataQuality}/100`, sub: p.dataQuality >= 70 ? "ข้อมูลค่อนข้างสมบูรณ์" : "ข้อมูลยังไม่ครบ", accent: p.dataQuality >= 70 ? "var(--neon-green)" : "var(--warning)" },
+            ? { label: "เตะมุม", value: `${p.cornerPick === "OVER" ? "สูง" : "ต่ำ"} ${p.cornerLine}`, sub: `เตะมุมรวม ${p.cornerLine}`, accent: "var(--soft-purple)" }
+            : { label: "เตะมุม", value: "ไม่มีข้อมูลเตะมุม", sub: "ไม่มีข้อมูล", accent: "var(--text-muted)" },
+          { label: "ความคุ้มค่า", value: "", sub: "ดาวความคุ้ม", stars: p.valueStars },
+          { label: "คุณภาพข้อมูล", value: `${p.dataQuality}/100`, sub: p.dataQuality >= 70 ? "ข้อมูลค่อนข้างสมบูรณ์" : "ข้อมูลยังไม่ครบ", accent: p.dataQuality >= 70 ? "var(--neon-green)" : "var(--warning)" },
         ].map((s) => (
           <div key={s.label} className="glass p-3">
             <p className="text-[10px] font-semibold tracking-wider text-[var(--text-muted)]">{s.label}</p>
@@ -280,7 +280,7 @@ export function MatchOfTheDay({
       <div className="mt-3 hidden space-y-3 lg:block">
         <div className="glass p-4">
           <p className="text-[11px] font-bold tracking-wider text-[var(--neon-green)]">
-            AI REASON{" "}
+            เหตุผล AI{" "}
             <span className="font-normal text-[var(--text-muted)]">
               {p.factors ? "(6 ปัจจัย · คะแนน 0-10)" : "(เหตุผลที่เลือก)"}
             </span>
@@ -303,7 +303,7 @@ export function MatchOfTheDay({
 
         <div className="glass p-4">
           <p className="flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-[var(--text-secondary)]">
-            <UserRound size={13} /> KEY PLAYER
+            <UserRound size={13} /> ผู้เล่นคนสำคัญ
           </p>
           {keyPlayers.length === 0 && (
             <p className="mt-3 text-[11px] text-[var(--text-muted)]">

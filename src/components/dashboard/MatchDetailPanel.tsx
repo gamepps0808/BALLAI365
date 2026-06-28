@@ -19,7 +19,7 @@ export function MatchDetailPanel({ fixture }: { fixture: Fixture }) {
     <aside className="space-y-3">
       <section className="glass p-4">
         <h3 className="text-[12px] font-extrabold tracking-wider">
-          <span className="mr-1 text-[var(--neon-blue)]">▎</span>MATCH DETAIL
+          <span className="mr-1 text-[var(--neon-blue)]">▎</span>รายละเอียดแมตช์
         </h3>
 
         <div className="mt-2 flex gap-1 border-b border-[var(--border-subtle)]">
@@ -53,7 +53,7 @@ export function MatchDetailPanel({ fixture }: { fixture: Fixture }) {
 
       {/* Weather */}
       <section className="glass p-4">
-        <h3 className="text-[12px] font-extrabold tracking-wider">WEATHER</h3>
+        <h3 className="text-[12px] font-extrabold tracking-wider">สภาพอากาศ</h3>
         <div className="mt-2 flex items-center gap-3">
           <CloudRain size={32} className="text-[var(--neon-blue)]" />
           <span className="text-2xl font-bold text-[var(--neon-blue)]">
@@ -105,7 +105,7 @@ function StatsTab({ fixture }: { fixture: Fixture }) {
     <>
       <H2HTab fixture={fixture} compact />
       <p className="mt-4 text-[10px] font-bold tracking-wider text-[var(--text-muted)]">
-        TEAM STATS (AVG)
+        สถิติทีม (เฉลี่ย)
       </p>
       <div className="mt-1.5 space-y-2">
         {rows.map((r) => {
@@ -148,7 +148,7 @@ function H2HTab({ fixture, compact }: { fixture: Fixture; compact?: boolean }) {
     return (
       <>
         <p className="mt-3 text-[10px] font-bold tracking-wider text-[var(--text-muted)]">
-          HEAD TO HEAD
+          สถิติเจอกัน
         </p>
         <p className="mt-1.5 text-[11px] text-[var(--text-muted)]">
           ยังไม่มีข้อมูลการเจอกัน (ดูเพิ่มในหน้ารายละเอียดคู่)
@@ -160,7 +160,7 @@ function H2HTab({ fixture, compact }: { fixture: Fixture; compact?: boolean }) {
   return (
     <>
       <p className="mt-3 text-[10px] font-bold tracking-wider text-[var(--text-muted)]">
-        HEAD TO HEAD
+        สถิติเจอกัน
       </p>
       <div className="mt-2 flex items-center justify-between">
         <TeamLogo teamId={home.id} shortName={home.shortName} logo={home.logo} size={30} />
