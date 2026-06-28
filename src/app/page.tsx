@@ -3,6 +3,8 @@ import { OverviewCards } from "@/components/dashboard/OverviewCards";
 import { QuickNav } from "@/components/dashboard/QuickNav";
 import { StatsStrip } from "@/components/dashboard/StatsStrip";
 import { DashboardMatches } from "@/components/dashboard/DashboardMatches";
+import { TopPicks } from "@/components/dashboard/TopPicks";
+import { RecentResults } from "@/components/dashboard/RecentResults";
 import { Disclaimer } from "@/components/ui/Disclaimer";
 import { AutoRefresh } from "@/components/ui/AutoRefresh";
 import { ProviderBanner } from "@/components/ui/ProviderBanner";
@@ -17,6 +19,7 @@ import {
 } from "@/lib/service";
 import { loadSavedAnalysis } from "@/lib/claude-store";
 import { loadLiveRead } from "@/lib/live-store";
+import { getAccuracySummary, settlePending } from "@/lib/accuracy";
 import type { LiveRead } from "@/lib/claude-live";
 
 export const dynamic = "force-dynamic";
@@ -67,6 +70,9 @@ export default async function DashboardPage() {
     const read = loadLiveRead<LiveRead>(f.id);
     if (read) liveReads[f.id] = read;
   }
+  // ผลล่าสุดของ AI (ตัดสินคู่ที่เพิ่งจบ แล้วดึงสถิติ — cache 30 นาที)
+  await settlePending().catch(() => 0);
+  const acc = getAccuracySummary();
   return (
     <main>
       {/* นาที/สกอร์ของคู่ที่กำลังเตะต้องเดินเอง — รีเฟรชเฉพาะตอนมีบอลสด */}
@@ -117,6 +123,12 @@ export default async function DashboardPage() {
         {/* การ์ดสถิติเต็ม — เฉพาะคอม (มือถือใช้แถบย่อล่างสุดแทน) */}
         <div className="hidden lg:block">
           <OverviewCards stats={overview} />
+        </div>
+
+        {/* ทีเด็ดวันนี้ + ผลล่าสุด — เห็น "เล่นอะไร" + "แม่นแค่ไหน" ทันทีบนสุด */}
+        <div className="grid gap-4 lg:grid-cols-2">
+          <TopPicks fixtures={fixtures} />
+          <RecentResults entries={acc.entries} />
         </div>
 
         {motd ? (
