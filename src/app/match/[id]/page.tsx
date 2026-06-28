@@ -33,6 +33,7 @@ import { DevDebugPanel } from "@/components/dev/DevDebugPanel";
 import { fetchFixture } from "@/lib/service";
 import { loadLiveRead } from "@/lib/live-store";
 import { LiveRead } from "@/lib/claude-live";
+import { AiFactors } from "@/components/match/AiFactors";
 import {
   confidenceLabel,
   confidenceTone,
@@ -553,6 +554,15 @@ export default async function MatchDetailPage({
                     </div>
                   )}
                 </div>
+              </div>
+            )}
+
+            {p.factors && (
+              <div className="mt-4">
+                <p className="mb-2 text-[11px] font-bold tracking-wider text-[var(--neon-green)]">
+                  AI วิเคราะห์ — 6 ปัจจัย <span className="font-normal text-[var(--text-muted)]">(คะแนน 0-10 ยิ่งสูงยิ่งหนุนฝั่งที่ทาย)</span>
+                </p>
+                <AiFactors factors={p.factors} />
               </div>
             )}
 

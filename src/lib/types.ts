@@ -209,6 +209,20 @@ export interface DataSourceFlag {
   available: boolean;
 }
 
+/** คะแนนรายปัจจัยจาก AI — score 0-10 (null=ข้อมูลไม่พอ) + เหตุผลสั้น */
+export interface AiFactor {
+  score: number | null;
+  noteTh: string;
+}
+export interface PredictionFactors {
+  form: AiFactor;
+  market: AiFactor;
+  xg: AiFactor;
+  injury: AiFactor;
+  tactical: AiFactor;
+  motivation: AiFactor;
+}
+
 export interface Prediction {
   pick: PickSide;
   pickTeamName: string; // ALWAYS the team name, never "Home Win"
@@ -238,6 +252,8 @@ export interface Prediction {
   dataQuality: number; // 0-100
   status: MatchStatus;
   reasons: string[]; // plain-language, Thai
+  /** คะแนน 6 ปัจจัยจาก AI (form/market/xg/injury/tactical/motivation) — undefined = คำทายเก่าก่อนมีฟีเจอร์นี้ */
+  factors?: PredictionFactors;
   riskFactors: string[];
   warning: string;
   modelOutputs: ModelOutput[];

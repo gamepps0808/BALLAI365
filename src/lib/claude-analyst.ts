@@ -17,8 +17,31 @@ import { Fixture, PickSide, ExternalResearch } from "./types";
  * - กฎความสอดคล้อง: สกอร์ที่ Claude ทายต้องตรงกับฝั่งที่ Claude เลือก
  */
 
+const FactorSchema = z.object({
+  score: z
+    .number()
+    .int()
+    .min(0)
+    .max(10)
+    .nullable()
+    .describe("คะแนน 0-10 ว่าปัจจัยนี้หนุน 'ฝั่งที่ทาย' มากแค่ไหน (10=หนุนเต็มที่ 5=กลางๆ 0=สวนทาง) — null ถ้าข้อมูลไม่พอ"),
+  noteTh: z.string().describe("เหตุผลสั้นมาก 1 วลี/ประโยคสั้น ภาษาไทย"),
+});
+
 const AnalysisSchema = z.object({
   pick: z.enum(["HOME", "DRAW", "AWAY"]),
+  factors: z
+    .object({
+      form: FactorSchema,
+      market: FactorSchema,
+      xg: FactorSchema,
+      injury: FactorSchema,
+      tactical: FactorSchema,
+      motivation: FactorSchema,
+    })
+    .describe(
+      "คะแนน 6 ปัจจัยที่ใช้ตัดสิน: form=ฟอร์มล่าสุด, market=ราคาเจ้ามือ/ตลาด, xg=โอกาสทำประตู (ถ้าไม่มี xG ตรงให้ประเมินจากค่าเฉลี่ยยิง/เสีย), injury=บาดเจ็บ/ตัวจริง, tactical=แทคติก/สไตล์การเล่น, motivation=แรงจูงใจ/ความสำคัญของเกม — ให้คะแนนทุกด้าน (null เฉพาะด้านที่ข้อมูลไม่พอจริงๆ)"
+    ),
   expectedScore: z.object({
     home: z.number().int(),
     away: z.number().int(),
@@ -395,6 +418,7 @@ export function applyClaudeAnalysis(fixture: Fixture, a: ClaudeAnalysis): void {
     ...a.reasonsTh,
     ...p.reasons,
   ].slice(0, 5);
+  if (a.factors) p.factors = a.factors;
 
   if (ensemblePick !== a.pick) {
     p.riskFactors = [

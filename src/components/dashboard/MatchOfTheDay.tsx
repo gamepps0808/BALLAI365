@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Star, Trophy, CheckCircle2, UserRound, Radio } from "lucide-react";
 import { Fixture } from "@/lib/types";
 import type { LiveRead } from "@/lib/claude-live";
+import { AiFactors } from "../match/AiFactors";
 import { TeamLogo } from "../ui/TeamLogo";
 import { PlayerPhoto } from "../ui/PlayerPhoto";
 import { FormBadges } from "../ui/FormBadges";
@@ -275,20 +276,27 @@ export function MatchOfTheDay({
         ))}
       </div>
 
-      {/* AI Reason + Key Players — ซ่อนบนมือถือ (อยู่ในหน้าวิเคราะห์เต็ม) โชว์เฉพาะคอม */}
-      <div className="mt-3 hidden gap-3 lg:grid lg:grid-cols-[1.1fr_1fr]">
+      {/* AI Reason (6 ปัจจัย) + Key Players — ซ่อนบนมือถือ (อยู่ในหน้าวิเคราะห์เต็ม) โชว์เฉพาะคอม */}
+      <div className="mt-3 hidden space-y-3 lg:block">
         <div className="glass p-4">
           <p className="text-[11px] font-bold tracking-wider text-[var(--neon-green)]">
-            AI REASON <span className="font-normal text-[var(--text-muted)]">(เหตุผลที่เลือก)</span>
+            AI REASON{" "}
+            <span className="font-normal text-[var(--text-muted)]">(6 ปัจจัย · คะแนน 0-10)</span>
           </p>
-          <ul className="mt-2 space-y-1.5">
-            {p.reasons.map((r) => (
-              <li key={r} className="flex items-start gap-2 text-[12px] text-[var(--text-secondary)]">
-                <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-[var(--neon-green)]" />
-                {r}
-              </li>
-            ))}
-          </ul>
+          {p.factors ? (
+            <div className="mt-2.5">
+              <AiFactors factors={p.factors} />
+            </div>
+          ) : (
+            <ul className="mt-2 space-y-1.5">
+              {p.reasons.map((r) => (
+                <li key={r} className="flex items-start gap-2 text-[12px] text-[var(--text-secondary)]">
+                  <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-[var(--neon-green)]" />
+                  {r}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <div className="glass p-4">
