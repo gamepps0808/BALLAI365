@@ -149,7 +149,13 @@ export class ApiFootballProvider implements FootballDataProvider {
     // — ประหยัด API: คู่เล็กไม่ถูกดึงเปล่า, ไม่พลาดคู่ใหญ่ที่อยู่ลำดับท้าย
     // fallback: ยังไม่มี selection (วันแรก/ยังไม่คัด) → ใช้ detailLimit แรกๆ กันหน้าว่าง
     const selection = loadSelection(day);
-    const bigIds = new Set(selection?.fixtureIds ?? []);
+    // คู่ลีกท็อป (บอลโลก/UCL/UEL/UECL/ยูโร/โกปา) ต้องเข้า deep analysis "เสมอ"
+    // แม้ selection เก่าจะตกหล่น (freeze ไว้ตอนรายการบอลยังไม่ครบ) — กันคู่ใหญ่ไม่ถูกวิเคราะห์
+    const TOP_LEAGUE_IDS = new Set([1, 2, 3, 4, 9, 848]);
+    const forcedBig = supported
+      .filter((f) => TOP_LEAGUE_IDS.has(f.league.id))
+      .map((f) => f.fixture.id);
+    const bigIds = new Set<number>([...(selection?.fixtureIds ?? []), ...forcedBig]);
     const detailLimit = getSettings().detailLimit;
 
     // ราคา bulk ทั้งวัน (Bet365) — เติมราคาแฮนดิแคป/1X2 ให้ทุกคู่รวมถึงคู่ที่ไม่ enrich
@@ -194,15 +200,13 @@ export class ApiFootballProvider implements FootballDataProvider {
         }
       }
       if (allowNewAnalysis) {
-        // วิเคราะห์ใหม่เฉพาะ "คู่ใหญ่" ที่คัดไว้และยังไม่เตะ — คู่ที่เซฟแล้วอ่านจากดิสก์ (ฟรี)
-        const selection = loadSelection(day);
+        // วิเคราะห์เฉพาะ "คู่ใหญ่" (selection + ลีกท็อปที่บังคับ) ที่ยังไม่เตะ — คู่ที่เซฟแล้วอ่านจากดิสก์ (ฟรี)
         const candidates = fixtures
           .filter(
             (f) =>
               f.status === "SCHEDULED" &&
               loadSavedAnalysis(f.id) === null &&
-              (!selection?.fixtureIds?.length ||
-                selection.fixtureIds.includes(Number(f.id.replace("af-", ""))))
+              (bigIds.size === 0 || bigIds.has(Number(f.id.replace("af-", ""))))
           )
           .sort((a, b) => b.prediction.aiScore - a.prediction.aiScore)
           .slice(0, Math.max(getSettings().claudeLimit, 1));
