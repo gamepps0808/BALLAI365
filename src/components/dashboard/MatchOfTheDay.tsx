@@ -281,7 +281,9 @@ export function MatchOfTheDay({
         <div className="glass p-4">
           <p className="text-[11px] font-bold tracking-wider text-[var(--neon-green)]">
             AI REASON{" "}
-            <span className="font-normal text-[var(--text-muted)]">(6 ปัจจัย · คะแนน 0-10)</span>
+            <span className="font-normal text-[var(--text-muted)]">
+              {p.factors ? "(6 ปัจจัย · คะแนน 0-10)" : "(เหตุผลที่เลือก)"}
+            </span>
           </p>
           {p.factors ? (
             <div className="mt-2.5">
