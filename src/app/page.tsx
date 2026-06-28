@@ -3,7 +3,6 @@ import { OverviewCards } from "@/components/dashboard/OverviewCards";
 import { QuickNav } from "@/components/dashboard/QuickNav";
 import { StatsStrip } from "@/components/dashboard/StatsStrip";
 import { DashboardMatches } from "@/components/dashboard/DashboardMatches";
-import { TopPicks } from "@/components/dashboard/TopPicks";
 import { RecentResults } from "@/components/dashboard/RecentResults";
 import { Disclaimer } from "@/components/ui/Disclaimer";
 import { AutoRefresh } from "@/components/ui/AutoRefresh";
@@ -125,11 +124,8 @@ export default async function DashboardPage() {
           <OverviewCards stats={overview} />
         </div>
 
-        {/* ทีเด็ดวันนี้ + ผลล่าสุด — เห็น "เล่นอะไร" + "แม่นแค่ไหน" ทันทีบนสุด */}
-        <div className="grid gap-4 lg:grid-cols-2">
-          <TopPicks fixtures={fixtures} />
-          <RecentResults entries={acc.entries} />
-        </div>
+        {/* แถบบาง "ผลล่าสุด" — ความเชื่อใจแบบไม่รก (รายละเอียดอยู่ /backtest) */}
+        <RecentResults entries={acc.entries} />
 
         {motd ? (
           <DashboardMatches
