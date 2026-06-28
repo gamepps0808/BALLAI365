@@ -25,13 +25,21 @@ const COLS: { title: string; links: [string, string][] }[] = [
       ["ตารางคะแนน", "/leagues"],
     ],
   },
+  {
+    title: "นโยบาย",
+    links: [
+      ["เงื่อนไขการใช้งาน", "/terms"],
+      ["ความเป็นส่วนตัว", "/privacy"],
+      ["เล่นอย่างมีความรับผิดชอบ", "/responsible"],
+    ],
+  },
 ];
 
 export function Footer() {
   const year = new Date().getFullYear() + 543; // พ.ศ.
   return (
     <footer className="mt-8 border-t border-[var(--border)] px-4 py-8 lg:px-6">
-      <div className="mx-auto grid max-w-6xl gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mx-auto grid max-w-6xl gap-8 sm:grid-cols-2 lg:grid-cols-5">
         {/* แบรนด์ */}
         <div className="lg:col-span-2">
           <p className="text-[15px] font-extrabold tracking-tight text-[var(--text-primary)]">
