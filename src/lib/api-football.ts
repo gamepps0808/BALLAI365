@@ -214,7 +214,10 @@ export function getOdds(fixtureId: number) {
 export function getOddsForDate(date: string): Promise<AfOddsDateItem[]> {
   return cached(`af:oddsdate:${date}`, 1800, async () => {
     const out: AfOddsDateItem[] = [];
-    for (let page = 1; page <= 8; page++) {
+    // วันบอลใหญ่ (บอลโลก) ราคามีได้ 18+ หน้า — เดิมตันที่ 8 ทำให้คู่หน้าลึกไม่มีราคา
+    // loop break เองเมื่อ current >= total อยู่แล้ว เพดานนี้แค่กันวันที่คู่เยอะจริง ๆ
+    const maxPages = Number(process.env.AF_ODDS_PAGES ?? 30);
+    for (let page = 1; page <= maxPages; page++) {
       const res = await fetch(
         `${BASE}/odds?date=${date}&bookmaker=8&page=${page}`,
         { headers: { "x-apisports-key": apiKey() }, signal: AbortSignal.timeout(15_000) }
