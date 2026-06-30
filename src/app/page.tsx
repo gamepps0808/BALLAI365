@@ -45,9 +45,13 @@ export default async function DashboardPage() {
       loadSavedAnalysis(f.id) !== null // มีผลวิเคราะห์ Claude = คู่ใหญ่ที่ AI เลือก
   );
   const seen = new Set<string>();
+  // ไม่เอาคู่ที่เตะไกลเกิน 30 ชม. มาเด่นบนหน้าแรก — กันบอลพรุ่งนี้ดึก ๆ มาแทรกเป็นคู่เด่น
+  // (ดูบอลล่วงหน้าทั้งหมดได้ที่หน้า "โปรแกรมล่วงหน้า")
+  const featureCutoff = Date.now() + 30 * 3600 * 1000;
   const fixtures = [...todayUpcomingBig, ...newDayRes.fixtures]
     .filter((f) => {
       if (f.status === "CANCELLED" || f.status === "POSTPONED" || seen.has(f.id)) return false;
+      if (f.status === "SCHEDULED" && new Date(f.kickoff).getTime() > featureCutoff) return false;
       seen.add(f.id);
       return true;
     })
@@ -135,8 +139,19 @@ export default async function DashboardPage() {
             liveReads={liveReads}
           />
         ) : (
-          <div className="glass p-12 text-center text-[13px] text-[var(--text-muted)]">
-            {`ยังไม่มีโปรแกรมบอลวันใหม่ (${newDayLabel}) ในลีกที่เปิดใช้งาน — บอลที่เหลือของวันนี้ดูได้ที่แมตช์วันนี้`}
+          <div className="glass p-10 text-center text-[13px] text-[var(--text-muted)]">
+            <p>ยังไม่มีคู่เด่นที่ใกล้เตะในตอนนี้</p>
+            <p className="mt-2 text-[12px]">
+              ดู{" "}
+              <Link href="/matches" className="text-[var(--neon-green)] hover:underline">
+                แมตช์วันนี้
+              </Link>{" "}
+              ·{" "}
+              <Link href="/fixtures" className="text-[var(--neon-green)] hover:underline">
+                โปรแกรมล่วงหน้า
+              </Link>{" "}
+              (บอลพรุ่งนี้/วันถัดไป)
+            </p>
           </div>
         )}
 
