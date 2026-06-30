@@ -46,6 +46,11 @@ export function footballNewDay(): string {
   return bkkDate(Date.now() - DAY_FLIP_HOURS + ONE_DAY);
 }
 
+/** เวลาปัจจุบัน + N ชั่วโมง (ms) — แยกออกจาก render component เพื่อเลี่ยง lint impure (Date.now) */
+export function msFromNow(hours: number): number {
+  return Date.now() + hours * 3600 * 1000;
+}
+
 export async function fetchFixtures(
   date?: string,
   opts?: { analyze?: boolean }

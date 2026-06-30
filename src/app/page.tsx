@@ -15,6 +15,7 @@ import {
   pickMatchOfTheDay,
   footballToday,
   footballNewDay,
+  msFromNow,
 } from "@/lib/service";
 import { loadSavedAnalysis } from "@/lib/claude-store";
 import { loadLiveRead } from "@/lib/live-store";
@@ -47,7 +48,7 @@ export default async function DashboardPage() {
   const seen = new Set<string>();
   // ไม่เอาคู่ที่เตะไกลเกิน 30 ชม. มาเด่นบนหน้าแรก — กันบอลพรุ่งนี้ดึก ๆ มาแทรกเป็นคู่เด่น
   // (ดูบอลล่วงหน้าทั้งหมดได้ที่หน้า "โปรแกรมล่วงหน้า")
-  const featureCutoff = Date.now() + 30 * 3600 * 1000;
+  const featureCutoff = msFromNow(30);
   const fixtures = [...todayUpcomingBig, ...newDayRes.fixtures]
     .filter((f) => {
       if (f.status === "CANCELLED" || f.status === "POSTPONED" || seen.has(f.id)) return false;
