@@ -15,7 +15,6 @@ import {
   pickMatchOfTheDay,
   footballToday,
   footballNewDay,
-  msFromNow,
 } from "@/lib/service";
 import { loadSavedAnalysis } from "@/lib/claude-store";
 import { loadLiveRead } from "@/lib/live-store";
@@ -46,9 +45,9 @@ export default async function DashboardPage() {
       loadSavedAnalysis(f.id) !== null // มีผลวิเคราะห์ Claude = คู่ใหญ่ที่ AI เลือก
   );
   const seen = new Set<string>();
-  // ไม่เอาคู่ที่เตะไกลเกิน 30 ชม. มาเด่นบนหน้าแรก — กันบอลพรุ่งนี้ดึก ๆ มาแทรกเป็นคู่เด่น
-  // (ดูบอลล่วงหน้าทั้งหมดได้ที่หน้า "โปรแกรมล่วงหน้า")
-  const featureCutoff = msFromNow(30);
+  // ตัดคู่ที่เตะ "หลังเที่ยงวันบอลถัดไป" ออกจากหน้าแรก — วันบอลพลิกตอนเที่ยง
+  // ดังนั้นเอาเฉพาะวันนี้ + คืนนี้ดึก (ก่อนเที่ยงพรุ่งนี้) · บอลพรุ่งนี้กลางวัน/เย็น = วันถัดไป ดูที่ "โปรแกรมล่วงหน้า"
+  const featureCutoff = new Date(`${newDay}T12:00:00+07:00`).getTime();
   const fixtures = [...todayUpcomingBig, ...newDayRes.fixtures]
     .filter((f) => {
       if (f.status === "CANCELLED" || f.status === "POSTPONED" || seen.has(f.id)) return false;
