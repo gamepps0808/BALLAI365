@@ -39,12 +39,16 @@ export default async function DashboardPage() {
   //  - วันบอลใหม่ (พรุ่งนี้) ทั้งชุด — คาคู่ที่เตะ/จบไว้จนรีเซ็ตเที่ยง
   //  - คู่ใหญ่ค่ำวันนี้ที่ยังไม่เตะ (เช่นบอลโลกเตะ 23:00 ที่ยังเป็นวันปฏิทินนี้)
   //    มิฉะนั้นบอลเด่นที่เตะคืนนี้จะตกไปอยู่ "แมตช์วันนี้" ไม่เด่นบนหน้าหลัก
-  const todayUpcomingBig = todayRes.fixtures.filter(
-    (f) =>
-      // รวม "จบแล้ว" ด้วย — คู่ที่ AI คัดไว้ให้อยู่บนหน้าแรกต่อ (โชว์ผล) จนวันบอลรีเซ็ตตอนเที่ยง
-      (f.status === "SCHEDULED" || f.status === "LIVE" || f.status === "FINISHED") &&
-      loadSavedAnalysis(f.id) !== null // มีผลวิเคราะห์ Claude = คู่ใหญ่ที่ AI เลือก
+  const isBigPick = (f: (typeof todayRes.fixtures)[number]) => loadSavedAnalysis(f.id) !== null;
+  const todayScheduledLive = todayRes.fixtures.filter(
+    (f) => (f.status === "SCHEDULED" || f.status === "LIVE") && isBigPick(f)
   );
+  // คู่ที่ AI คัดและ "เพิ่งจบ" — เก็บไว้โชว์ผลแค่ล่าสุด 2 คู่ (ไม่ให้คู่จบทั้งวันมากองบนหน้าแรก)
+  const todayRecentFinished = todayRes.fixtures
+    .filter((f) => f.status === "FINISHED" && isBigPick(f))
+    .sort((a, b) => b.kickoff.localeCompare(a.kickoff))
+    .slice(0, 2);
+  const todayUpcomingBig = [...todayScheduledLive, ...todayRecentFinished];
   const seen = new Set<string>();
   // ตัดคู่ที่เตะ "หลังเที่ยงวันบอลถัดไป" ออกจากหน้าแรก — วันบอลพลิกตอนเที่ยง
   // ดังนั้นเอาเฉพาะวันนี้ + คืนนี้ดึก (ก่อนเที่ยงพรุ่งนี้) · บอลพรุ่งนี้กลางวัน/เย็น = วันถัดไป ดูที่ "โปรแกรมล่วงหน้า"
