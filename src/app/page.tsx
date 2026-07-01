@@ -41,7 +41,8 @@ export default async function DashboardPage() {
   //    มิฉะนั้นบอลเด่นที่เตะคืนนี้จะตกไปอยู่ "แมตช์วันนี้" ไม่เด่นบนหน้าหลัก
   const todayUpcomingBig = todayRes.fixtures.filter(
     (f) =>
-      (f.status === "SCHEDULED" || f.status === "LIVE") &&
+      // รวม "จบแล้ว" ด้วย — คู่ที่ AI คัดไว้ให้อยู่บนหน้าแรกต่อ (โชว์ผล) จนวันบอลรีเซ็ตตอนเที่ยง
+      (f.status === "SCHEDULED" || f.status === "LIVE" || f.status === "FINISHED") &&
       loadSavedAnalysis(f.id) !== null // มีผลวิเคราะห์ Claude = คู่ใหญ่ที่ AI เลือก
   );
   const seen = new Set<string>();
