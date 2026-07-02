@@ -5,6 +5,7 @@ import { StatsStrip } from "@/components/dashboard/StatsStrip";
 import { DashboardMatches } from "@/components/dashboard/DashboardMatches";
 import { RecentResults } from "@/components/dashboard/RecentResults";
 import { LiveTicker, TickerItem } from "@/components/dashboard/LiveTicker";
+import { WelcomeBanner } from "@/components/dashboard/WelcomeBanner";
 import { Disclaimer } from "@/components/ui/Disclaimer";
 import { AutoRefresh } from "@/components/ui/AutoRefresh";
 import { ProviderBanner } from "@/components/ui/ProviderBanner";
@@ -115,6 +116,8 @@ export default async function DashboardPage() {
       {/* แถบสกอร์วิ่ง — สด/ใกล้เตะ ให้เว็บมีชีวิตตั้งแต่วินาทีแรก */}
       <LiveTicker items={tickerItems} />
       <div className="space-y-4 p-4 lg:p-6">
+        {/* ต้อนรับผู้เข้าใหม่ครั้งแรก (ปิดแล้วไม่โผล่อีก) */}
+        <WelcomeBanner accuracyPct={acc.overall.pct} gradedCount={acc.overall.total} />
         {/* มือถือ: ทางลัดฟีเจอร์หลักบนสุด ให้เห็นทันทีว่าแอพทำอะไรได้ (คอมใช้ sidebar) */}
         <QuickNav />
         <ProviderBanner provider={provider} fallback={fallback} error={error} />

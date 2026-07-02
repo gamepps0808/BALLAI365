@@ -34,6 +34,7 @@ import { fetchFixture } from "@/lib/service";
 import { loadLiveRead } from "@/lib/live-store";
 import { LiveRead } from "@/lib/claude-live";
 import { AiFactors } from "@/components/match/AiFactors";
+import { ShareButtons } from "@/components/match/ShareButtons";
 import {
   confidenceLabel,
   confidenceTone,
@@ -105,16 +106,19 @@ export default async function MatchDetailPage({
         >
           <ArrowLeft size={14} /> กลับหน้าหลัก
         </Link>
-        <FavoriteStar
-          match={{
-            id: fixture.id,
-            home: home.name,
-            away: away.name,
-            kickoff: fixture.kickoff,
-            kickoffLabel: fixture.kickoffLabel,
-            league: league.nameTh,
-          }}
-        />
+        <div className="flex items-center gap-2">
+          <ShareButtons title={`AI ทาย ${home.name} vs ${away.name} — BALLAI365`} />
+          <FavoriteStar
+            match={{
+              id: fixture.id,
+              home: home.name,
+              away: away.name,
+              kickoff: fixture.kickoff,
+              kickoffLabel: fixture.kickoffLabel,
+              league: league.nameTh,
+            }}
+          />
+        </div>
         </div>
 
         <ProviderBanner provider={provider} fallback={fallback} error={error} />

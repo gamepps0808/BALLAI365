@@ -7,10 +7,17 @@ import { LedgerEntry } from "@/lib/accuracy";
  * ตัวสร้างความเชื่อใจแบบไม่รก คลิกไปดูสถิติเต็มที่ /backtest
  */
 export function RecentResults({ entries }: { entries: LedgerEntry[] }) {
-  const recent = entries.filter((e) => e.r1x2 != null).slice(0, 10);
+  const graded = entries.filter((e) => e.r1x2 != null);
+  const recent = graded.slice(0, 10);
   if (recent.length === 0) return null;
   const won = recent.filter((e) => e.r1x2).length;
   const pct = Math.round((won / recent.length) * 100);
+  // ฟอร์มร้อนแรง — ทายถูกติดต่อกันกี่คู่ล่าสุด (โชว์เมื่อ ≥ 3)
+  let streak = 0;
+  for (const e of graded) {
+    if (e.r1x2) streak++;
+    else break;
+  }
 
   return (
     <Link
@@ -23,6 +30,11 @@ export function RecentResults({ entries }: { entries: LedgerEntry[] }) {
         {won}/{recent.length}
       </span>
       <span className="text-[var(--text-muted)]">({pct}%)</span>
+      {streak >= 3 && (
+        <span className="rounded-full bg-[var(--warning-soft)] px-2 py-0.5 text-[10.5px] font-extrabold text-[var(--warning)]">
+          🔥 ถูก {streak} คู่ติด
+        </span>
+      )}
       <span className="ml-1 flex items-center gap-1">
         {recent.map((e, i) => (
           <span
