@@ -1,4 +1,5 @@
 import { aiScoreTone } from "@/lib/engine/labels";
+import { CountUp } from "./CountUp";
 
 const ringColor: Record<string, string> = {
   green: "var(--neon-green)",
@@ -43,7 +44,14 @@ export function ScoreRing({
           strokeLinecap="round"
           strokeDasharray={c}
           strokeDashoffset={c * (1 - score / 100)}
-          style={{ filter: `drop-shadow(0 0 6px ${color})` }}
+          style={
+            {
+              filter: `drop-shadow(0 0 6px ${color})`,
+              // วาดวงแหวนเข้าตอนแรกเห็น (จากว่าง → ค่าจริง)
+              "--ring-full": `${c}`,
+              animation: "ring-in 0.9s ease-out",
+            } as React.CSSProperties
+          }
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -51,7 +59,7 @@ export function ScoreRing({
           className="tabular font-bold leading-none"
           style={{ color, fontSize: size * 0.3 }}
         >
-          {score}
+          <CountUp value={score} />
         </span>
         {size >= 70 && (
           <span className="text-[10px] text-[var(--text-muted)]">{label}</span>

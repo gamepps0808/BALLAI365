@@ -4,6 +4,7 @@ import { QuickNav } from "@/components/dashboard/QuickNav";
 import { StatsStrip } from "@/components/dashboard/StatsStrip";
 import { DashboardMatches } from "@/components/dashboard/DashboardMatches";
 import { RecentResults } from "@/components/dashboard/RecentResults";
+import { LiveTicker, TickerItem } from "@/components/dashboard/LiveTicker";
 import { Disclaimer } from "@/components/ui/Disclaimer";
 import { AutoRefresh } from "@/components/ui/AutoRefresh";
 import { ProviderBanner } from "@/components/ui/ProviderBanner";
@@ -81,11 +82,38 @@ export default async function DashboardPage() {
   // ผลล่าสุดของ AI (ตัดสินคู่ที่เพิ่งจบ แล้วดึงสถิติ — cache 30 นาที)
   await settlePending().catch(() => 0);
   const acc = getAccuracySummary();
+
+  // แถบสกอร์วิ่งบนสุด — บอลสดก่อน ไม่มีสดใช้คู่ใกล้เตะของวันนี้ (แถบไม่หาย เว็บดูมีชีวิตเสมอ)
+  const toTicker = (f: (typeof todayRes.fixtures)[number]): TickerItem => ({
+    id: f.id,
+    home: f.homeTeam.shortName,
+    away: f.awayTeam.shortName,
+    homeGoals: f.homeGoals ?? null,
+    awayGoals: f.awayGoals ?? null,
+    elapsed: f.elapsed ?? null,
+    live: f.status === "LIVE",
+    kickoffLabel: f.kickoffLabel,
+  });
+  const liveNow = todayRes.fixtures.filter((f) => f.status === "LIVE").map(toTicker);
+  // ไม่มีสด → คู่รอเตะของวันนี้ · วันนี้จบหมดแล้ว (ช่วงดึก) → คู่เด่นชุดถัดไปบนหน้าแรก
+  const upcomingPool =
+    todayRes.fixtures.filter((f) => f.status === "SCHEDULED").length > 0
+      ? todayRes.fixtures.filter((f) => f.status === "SCHEDULED")
+      : fixtures.filter((f) => f.status === "SCHEDULED");
+  const tickerItems =
+    liveNow.length > 0
+      ? liveNow
+      : upcomingPool
+          .sort((a, b) => a.kickoff.localeCompare(b.kickoff))
+          .slice(0, 6)
+          .map(toTicker);
   return (
     <main>
       {/* นาที/สกอร์ของคู่ที่กำลังเตะต้องเดินเอง — รีเฟรชเฉพาะตอนมีบอลสด */}
       {hasLive && <AutoRefresh seconds={60} />}
       <Topbar title="ภาพรวมวันนี้" />
+      {/* แถบสกอร์วิ่ง — สด/ใกล้เตะ ให้เว็บมีชีวิตตั้งแต่วินาทีแรก */}
+      <LiveTicker items={tickerItems} />
       <div className="space-y-4 p-4 lg:p-6">
         {/* มือถือ: ทางลัดฟีเจอร์หลักบนสุด ให้เห็นทันทีว่าแอพทำอะไรได้ (คอมใช้ sidebar) */}
         <QuickNav />

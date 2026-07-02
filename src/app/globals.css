@@ -123,3 +123,34 @@ body {
 .tabular {
   font-variant-numeric: tabular-nums;
 }
+
+/* ---------- motion (ชุด "ว้าว") ---------- */
+/* skeleton โหลด — แถบวิ่งเรืองแสง */
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeleton {
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(120,150,200,0.07) 25%, rgba(120,150,200,0.16) 50%, rgba(120,150,200,0.07) 75%);
+  background-size: 400px 100%;
+  animation: shimmer 1.3s infinite linear;
+}
+/* การ์ดเข้าฉาก */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up { animation: fade-up 0.45s ease-out both; }
+/* แถบสกอร์วิ่ง (ticker) */
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.ticker-track { animation: ticker-scroll var(--ticker-speed, 30s) linear infinite; }
+.ticker-track:hover { animation-play-state: paused; }
+/* วงแหวนคะแนน — วาดเข้าตอนแรกเห็น */
+@keyframes ring-in { from { stroke-dashoffset: var(--ring-full); } }
+@media (prefers-reduced-motion: reduce) {
+  .skeleton, .animate-fade-up, .ticker-track { animation: none; }
+}

@@ -3,6 +3,8 @@ import { Star, Trophy, CheckCircle2, UserRound, Radio } from "lucide-react";
 import { Fixture } from "@/lib/types";
 import type { LiveRead } from "@/lib/claude-live";
 import { AiFactors } from "../match/AiFactors";
+import { CountUp } from "../ui/CountUp";
+import { KickoffCountdown } from "../ui/KickoffCountdown";
 import { TeamLogo } from "../ui/TeamLogo";
 import { PlayerPhoto } from "../ui/PlayerPhoto";
 import { FormBadges } from "../ui/FormBadges";
@@ -33,7 +35,7 @@ export function MatchOfTheDay({
   );
 
   return (
-    <section className="glass glow-green p-4 lg:p-5">
+    <section className="glass glow-green animate-fade-up p-4 lg:p-5">
       {/* LIVE AI — ทรรศนะสด (เฉพาะตอนกำลังเตะ + มีผลจาก cron) */}
       {fixture.status === "LIVE" && liveRead && (
         <div className="mb-3 rounded-xl border border-[rgba(255,77,94,0.4)] bg-[rgba(255,77,94,0.06)] p-3">
@@ -89,6 +91,7 @@ export function MatchOfTheDay({
             {fixture.kickoffLabel}{" "}
             <span className="text-[var(--text-muted)]">{kickoffDateLabel(fixture.kickoff)}</span>
           </p>
+          {fixture.status === "SCHEDULED" && <KickoffCountdown kickoff={fixture.kickoff} />}
           {fixture.status === "LIVE" ? (
             <>
               <p className="tabular text-2xl font-black tracking-widest text-[var(--danger)] lg:text-3xl">
@@ -178,7 +181,7 @@ export function MatchOfTheDay({
             ].map(({ v, l, c }) => (
               <div key={l} className="min-w-0 text-center">
                 <p className="tabular text-xl font-extrabold leading-none" style={{ color: c }}>
-                  {v}%
+                  <CountUp value={v} />%
                 </p>
                 <p className="mt-1 truncate text-[10px] text-[var(--text-muted)]" title={l}>
                   {l}
