@@ -50,18 +50,24 @@ export default async function DashboardPage() {
     .filter((f) => f.status === "FINISHED" && isBigPick(f))
     .sort((a, b) => b.kickoff.localeCompare(a.kickoff))
     .slice(0, 2);
-  const todayUpcomingBig = [...todayScheduledLive, ...todayRecentFinished];
-  const seen = new Set<string>();
-  // ตัดคู่ที่เตะ "หลังเที่ยงวันบอลถัดไป" ออกจากหน้าแรก — วันบอลพลิกตอนเที่ยง
-  // ดังนั้นเอาเฉพาะวันนี้ + คืนนี้ดึก (ก่อนเที่ยงพรุ่งนี้) · บอลพรุ่งนี้กลางวัน/เย็น = วันถัดไป ดูที่ "โปรแกรมล่วงหน้า"
+  // ตัดคู่ที่เตะ "หลังเที่ยงวันบอลถัดไป" ออก (วันบอลพลิกตอนเที่ยง) — บอลพรุ่งนี้กลางวัน/เย็นไปดูที่ "โปรแกรมล่วงหน้า"
   const featureCutoff = new Date(`${newDay}T12:00:00+07:00`).getTime();
-  const fixtures = [...todayUpcomingBig, ...newDayRes.fixtures]
-    .filter((f) => {
+  const seen = new Set<string>();
+  const dedup = (list: typeof newDayRes.fixtures) =>
+    list.filter((f) => {
       if (f.status === "CANCELLED" || f.status === "POSTPONED" || seen.has(f.id)) return false;
       if (f.status === "SCHEDULED" && new Date(f.kickoff).getTime() > featureCutoff) return false;
       seen.add(f.id);
       return true;
-    })
+    });
+  // คู่ "รอเตะ/กำลังเตะ" (วันนี้ big + วันบอลใหม่) — พอถึงเวลามีคู่ใหม่ คู่ที่จบจะตกไปเอง
+  const upcomingLive = dedup([
+    ...todayScheduledLive,
+    ...newDayRes.fixtures.filter((f) => f.status === "SCHEDULED" || f.status === "LIVE"),
+  ]);
+  // มีคู่รอเตะ/สด → โชว์เฉพาะพวกนั้น (คู่ที่จบแล้วไปดูที่ผลบอลย้อนหลัง)
+  // ไม่มีเลย → fallback คู่ที่เพิ่งจบล่าสุด (กันหน้าโล่งช่วงไม่มีบอล)
+  const fixtures = (upcomingLive.length > 0 ? upcomingLive : todayRecentFinished)
     .sort((a, b) => b.prediction.aiScore - a.prediction.aiScore)
     .slice(0, 10);
   const overview = computeOverview(fixtures);
