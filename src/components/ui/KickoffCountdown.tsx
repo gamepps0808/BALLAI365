@@ -13,9 +13,9 @@ function label(msLeft: number): string | null {
   const d = Math.floor(m / 1440);
   const h = Math.floor((m % 1440) / 60);
   const mm = m % 60;
-  if (d > 0) return `เตะในอีก ${d} วัน ${h} ชม.`;
-  if (h > 0) return `เตะในอีก ${h} ชม. ${mm} นาที`;
-  if (mm >= 1) return `เตะในอีก ${mm} นาที`;
+  if (d > 0) return `อีก ${d} วัน ${h} ชม.`;
+  if (h > 0) return `อีก ${h} ชม. ${mm} น.`;
+  if (mm >= 1) return `อีก ${mm} นาที`;
   return "ใกล้เตะแล้ว!";
 }
 
@@ -35,6 +35,8 @@ export function KickoffCountdown({ kickoff }: { kickoff: string }) {
 
   if (!text) return null;
   return (
-    <p className="tabular mt-0.5 text-[11px] font-bold text-[var(--warning)]">⏱ {text}</p>
+    <p className="tabular mt-0.5 whitespace-nowrap text-[11px] font-bold text-[var(--warning)]">
+      ⏱ {text}
+    </p>
   );
 }

@@ -126,8 +126,8 @@ export function MatchScanner({
       <div className="hidden overflow-x-auto md:block">
         <table className="w-full text-[12px]">
           <thead>
-            <tr className="text-left text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
-              {["เวลา", "ลีก", "คู่แข่งขัน", MARKET_HEADER[market], "AI Score", "Win Probability", "Prediction", "Confidence", "Risk", "Value", ""].map(
+            <tr className="text-left text-[10px] tracking-wider text-[var(--text-muted)]">
+              {["เวลา", "ลีก", "คู่แข่งขัน", MARKET_HEADER[market], "คะแนน AI", "โอกาสชนะ", "AI เลือก", "ความมั่นใจ", "ความเสี่ยง", "ความคุ้ม", ""].map(
                 (h) => (
                   <th key={h} className="px-3 py-2.5 font-semibold">
                     {h}
@@ -317,7 +317,7 @@ export function MatchScanner({
               </p>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 <Badge tone={confidenceTone[p.confidence]}>{confidenceLabel[p.confidence]}</Badge>
-                <Badge tone={riskTone[p.risk]}>RISK {riskLabel[p.risk]}</Badge>
+                <Badge tone={riskTone[p.risk]}>{riskLabel[p.risk]}</Badge>
                 <Badge tone={valueTone[p.value]}>{valueLabel[p.value]}</Badge>
                 {onSelect && (
                   <Link

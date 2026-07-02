@@ -57,19 +57,21 @@ export function MatchOfTheDay({
           )}
         </div>
       )}
-      {/* Header */}
-      <div className="flex items-center gap-2">
-        <Star size={16} className="fill-[var(--neon-green)] text-[var(--neon-green)]" />
-        <h2 className="text-sm font-extrabold tracking-widest text-[var(--neon-green)]">
-          {fixture.isMatchOfTheDay ? "บอลเด่นวันนี้ (AI)" : "คู่ที่เลือกดู"}
-        </h2>
-        {!fixture.isMatchOfTheDay && (
-          <span className="rounded bg-[var(--neon-blue-soft)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--neon-blue)]">
-            SELECTED
-          </span>
-        )}
+      {/* Header — มือถือ: ปุ่มแชร์ wrap ลงบรรทัดใหม่ (ไม่เบียดชื่อ) · จอใหญ่: ปุ่มชิดขวา */}
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-2">
+        <div className="flex shrink-0 items-center gap-2">
+          <Star size={16} className="shrink-0 fill-[var(--neon-green)] text-[var(--neon-green)]" />
+          <h2 className="whitespace-nowrap text-sm font-extrabold text-[var(--neon-green)]">
+            {fixture.isMatchOfTheDay ? "บอลเด่นวันนี้ (AI)" : "คู่ที่เลือกดู"}
+          </h2>
+          {!fixture.isMatchOfTheDay && (
+            <span className="rounded bg-[var(--neon-blue-soft)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--neon-blue)]">
+              SELECTED
+            </span>
+          )}
+        </div>
         {/* แชร์ + ติดตาม คู่นี้ได้จากหน้าแรกเลย ไม่ต้องกดเข้าหน้าวิเคราะห์ */}
-        <div className="ml-auto flex items-center gap-2">
+        <div className="flex items-center gap-2 sm:ml-auto">
           <ShareButtons
             title={`AI ทาย ${home.name} vs ${away.name} — BALLAI365`}
             path={`/match/${fixture.id}`}

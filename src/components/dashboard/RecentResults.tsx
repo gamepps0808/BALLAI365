@@ -22,20 +22,20 @@ export function RecentResults({ entries }: { entries: LedgerEntry[] }) {
   return (
     <Link
       href="/backtest"
-      className="glass glass-hover flex items-center gap-2.5 p-3 text-[12px] text-[var(--text-secondary)]"
+      className="glass glass-hover flex flex-wrap items-center gap-x-2.5 gap-y-1.5 p-3 text-[12px] text-[var(--text-secondary)]"
     >
       <History size={15} className="shrink-0 text-[var(--neon-blue)]" />
-      <span className="font-bold text-[var(--text-primary)]">ผลล่าสุด AI</span>
-      <span className="tabular font-extrabold text-[var(--neon-green)]">
+      <span className="whitespace-nowrap font-bold text-[var(--text-primary)]">ผลล่าสุด AI</span>
+      <span className="tabular whitespace-nowrap font-extrabold text-[var(--neon-green)]">
         {won}/{recent.length}
       </span>
-      <span className="text-[var(--text-muted)]">({pct}%)</span>
+      <span className="whitespace-nowrap text-[var(--text-muted)]">({pct}%)</span>
       {streak >= 3 && (
-        <span className="rounded-full bg-[var(--warning-soft)] px-2 py-0.5 text-[10.5px] font-extrabold text-[var(--warning)]">
+        <span className="whitespace-nowrap rounded-full bg-[var(--warning-soft)] px-2 py-0.5 text-[10.5px] font-extrabold text-[var(--warning)]">
           🔥 ถูก {streak} คู่ติด
         </span>
       )}
-      <span className="ml-1 flex items-center gap-1">
+      <span className="flex items-center gap-1">
         {recent.map((e, i) => (
           <span
             key={i}
@@ -44,7 +44,9 @@ export function RecentResults({ entries }: { entries: LedgerEntry[] }) {
           />
         ))}
       </span>
-      <span className="ml-auto shrink-0 text-[var(--neon-green)]">ดูทั้งหมด →</span>
+      <span className="shrink-0 whitespace-nowrap text-[var(--neon-green)] sm:ml-auto">
+        ดูทั้งหมด →
+      </span>
     </Link>
   );
 }
