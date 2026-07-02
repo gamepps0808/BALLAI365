@@ -5,12 +5,14 @@ import { Share2, Link2, Check } from "lucide-react";
 
 /**
  * ปุ่มแชร์คำทาย — LINE / Facebook / คัดลอกลิงก์ (มือถือมี native share ให้ด้วย)
- * ใช้ URL หน้าปัจจุบันตอนกด (ไม่ต้องส่ง SITE_URL) — รูป preview ใช้ OG image ที่มีอยู่แล้ว
+ * ไม่ส่ง path = แชร์หน้าปัจจุบัน · ส่ง path (เช่น /match/af-123) = แชร์หน้านั้นจากที่ไหนก็ได้
+ * รูป preview ใช้ OG image ที่มีอยู่แล้ว
  */
-export function ShareButtons({ title }: { title: string }) {
+export function ShareButtons({ title, path }: { title: string; path?: string }) {
   const [copied, setCopied] = useState(false);
 
-  const pageUrl = () => window.location.href.split("#")[0];
+  const pageUrl = () =>
+    path ? `${window.location.origin}${path}` : window.location.href.split("#")[0];
 
   const shareLine = () =>
     window.open(

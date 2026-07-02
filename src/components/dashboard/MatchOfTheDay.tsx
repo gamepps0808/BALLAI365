@@ -5,6 +5,8 @@ import type { LiveRead } from "@/lib/claude-live";
 import { AiFactors } from "../match/AiFactors";
 import { CountUp } from "../ui/CountUp";
 import { KickoffCountdown } from "../ui/KickoffCountdown";
+import { ShareButtons } from "../match/ShareButtons";
+import { FavoriteStar } from "../ui/FavoriteStar";
 import { TeamLogo } from "../ui/TeamLogo";
 import { PlayerPhoto } from "../ui/PlayerPhoto";
 import { FormBadges } from "../ui/FormBadges";
@@ -66,6 +68,23 @@ export function MatchOfTheDay({
             SELECTED
           </span>
         )}
+        {/* แชร์ + ติดตาม คู่นี้ได้จากหน้าแรกเลย ไม่ต้องกดเข้าหน้าวิเคราะห์ */}
+        <div className="ml-auto flex items-center gap-2">
+          <ShareButtons
+            title={`AI ทาย ${home.name} vs ${away.name} — BALLAI365`}
+            path={`/match/${fixture.id}`}
+          />
+          <FavoriteStar
+            match={{
+              id: fixture.id,
+              home: home.name,
+              away: away.name,
+              kickoff: fixture.kickoff,
+              kickoffLabel: fixture.kickoffLabel,
+              league: league.nameTh,
+            }}
+          />
+        </div>
       </div>
 
       {/* Teams */}
