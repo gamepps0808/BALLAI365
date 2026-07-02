@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Noto_Sans_Thai } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { getAccuracySummary } from "@/lib/accuracy";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Footer } from "@/components/layout/Footer";
+import { InstallApp } from "@/components/pwa/InstallApp";
 import { SITE_URL, SITE_NAME, SITE_TAGLINE } from "@/lib/seo";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { siteJsonLd } from "@/lib/jsonld";
@@ -49,6 +50,11 @@ export const metadata: Metadata = {
     title: `${SITE_NAME} — ${SITE_TAGLINE}`,
     description: DESC,
   },
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: SITE_NAME },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#060b16",
 };
 
 export default function RootLayout({
@@ -81,6 +87,7 @@ export default function RootLayout({
           <Footer />
         </div>
         <BottomNav />
+        <InstallApp />
       </body>
     </html>
   );
